@@ -158,6 +158,7 @@
 
 <div class="content">
     <form method="post" id="payment-form" action="{{url('/checkout')}}">
+        @csrf
         <section>
             <label for="amount">
                 <span class="input-label">Amount</span>

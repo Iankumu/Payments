@@ -43,6 +43,11 @@ Route::post('/checkout',function (Request $request){
     $result = $gateway->transaction()->sale([
         'amount' => $amount,
         'paymentMethodNonce' => $nonce,
+        'customer'=>[
+            'firstName'=>'Ian',
+            'lastName'=>'Kumu',
+            'email'=>'ian.kumu@gmail.com'
+        ],
         'options' => [
             'submitForSettlement' => true
         ]
@@ -63,5 +68,20 @@ Route::post('/checkout',function (Request $request){
 //        header("Location: " . $baseUrl . "index.php");
         return back()->withErrors('An Error occured with the message: '.$result->message);
     }
+
+});
+
+Route::get('/hosted',function() {
+    $gateway = new Braintree\Gateway([
+        'environment' => config('services.braintree.environment'),
+        'merchantId' => config('services.braintree.merchantID'),
+        'publicKey' => config('services.braintree.publicKey'),
+        'privateKey' => config('services.braintree.privateKey')
+    ]);
+
+    $token = $gateway->ClientToken()->generate();
+    return view('hosted',[
+        'token'=>$token
+    ]);
 
 });

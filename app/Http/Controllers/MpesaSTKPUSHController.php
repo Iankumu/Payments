@@ -9,8 +9,8 @@ class MpesaSTKPUSHController extends Controller
 {
     public function generateAccessToken()
     {
-        $consumer_key = "7Lc5VG8PSo0G6iVYGrA9pueEtQc3ZdF0";
-        $consumer_secret = "Luj0WMC76SvbIxo6";
+        $consumer_key = "Zh8cNZhAk20ix6lUdFrOqzjmUiJOpOZS";
+        $consumer_secret = "br549tjxXGdHGB1h";
         $credentials = base64_encode($consumer_key . ":" . $consumer_secret);
         $url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
         $curl = curl_init();
@@ -48,12 +48,12 @@ class MpesaSTKPUSHController extends Controller
             'BusinessShortCode' => 174379,
             'Password' => $this->lipaNaMpesaPassword(),
             'Timestamp' => Carbon::rawParse('now')->format('YmdHms'),
-            'TransactionType' => 'CustomerBuyGoodsOnline',
+            'TransactionType' => 'CustomerPayBillOnline',
             'Amount' => $amount,
             'PartyA' => $phoneno, // replace this with your phone number
             'PartyB' => 174379,
             'PhoneNumber' => $phoneno, // replace this with your phone number
-            'CallBackURL' => 'http://478c511150f5.ngrok.io',
+            'CallBackURL' => 'https://8fe6652e7e7f.ngrok.io',
             'AccountReference' => "Testing",
             'TransactionDesc' => "Testing stk push on sandbox"
         ];
