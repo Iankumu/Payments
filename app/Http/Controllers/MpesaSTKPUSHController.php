@@ -9,8 +9,8 @@ class MpesaSTKPUSHController extends Controller
 {
     public function generateAccessToken()
     {
-        $consumer_key = "Zh8cNZhAk20ix6lUdFrOqzjmUiJOpOZS";
-        $consumer_secret = "br549tjxXGdHGB1h";
+        $consumer_key = env('MPESA_CONSUMER_KEY');
+        $consumer_secret = env('MPESA_CONSUMER_SECRET');
         $credentials = base64_encode($consumer_key . ":" . $consumer_secret);
         $url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
         $curl = curl_init();
@@ -26,8 +26,8 @@ class MpesaSTKPUSHController extends Controller
     public function LipaNaMpesaPassword()
     {
         $lipa_time = Carbon::rawParse('now')->format('YmdHms');
-        $passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
-        $BusinessShortCode = 174379;
+        $passkey = env('SAFARICOM_PASSKEY');
+        $BusinessShortCode = env('MPESA_BUSINESS_SHORTCODE');
         $timestamp = $lipa_time;
         $lipa_na_mpesa_password = base64_encode($BusinessShortCode . $passkey . $timestamp);
         return $lipa_na_mpesa_password;
@@ -45,15 +45,15 @@ class MpesaSTKPUSHController extends Controller
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->generateAccessToken()));
         $curl_post_data = [
             //Fill in the request parameters with valid values
-            'BusinessShortCode' => 174379,
+            'BusinessShortCode' => env('MPESA_BUSINESS_SHORTCODE'),
             'Password' => $this->lipaNaMpesaPassword(),
             'Timestamp' => Carbon::rawParse('now')->format('YmdHms'),
             'TransactionType' => 'CustomerPayBillOnline',
             'Amount' => $amount,
             'PartyA' => $phoneno, // replace this with your phone number
-            'PartyB' => 174379,
+            'PartyB' =>  env('MPESA_BUSINESS_SHORTCODE'),
             'PhoneNumber' => $phoneno, // replace this with your phone number
-            'CallBackURL' => 'https://8fe6652e7e7f.ngrok.io',
+            'CallBackURL' => env('MPESA_CALLBACK_URL'),
             'AccountReference' => "Testing",
             'TransactionDesc' => "Testing stk push on sandbox"
         ];
