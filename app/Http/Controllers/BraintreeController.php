@@ -30,6 +30,9 @@ class BraintreeController extends Controller
 
         $payment_nonce = $request->input('nonce');
         $amount = $request->input('amount');
+        $fname = $request->input('fname');
+        $lname = $request->input('lname');
+        $email = $request->input('email');
         // Initializing Braintree
         $gateway = $this->Gateway();
 
@@ -41,9 +44,9 @@ class BraintreeController extends Controller
             'amount' => $amount,
             'paymentMethodNonce' => $nonceFromTheClient,
             'customer' => [
-                'firstName' => 'Ian',
-                'lastName' => 'Kumu',
-                'email' => 'ian.kumu@gmail.com'
+                'firstName' => $fname,
+                'lastName' => $lname,
+                'email' => $email
             ],
             'options' => [
                 'submitForSettlement' => True

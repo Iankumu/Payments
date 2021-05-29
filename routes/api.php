@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BraintreeController;
+use App\Http\Controllers\MpesaSTKPUSHController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,20 +20,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
-// Route::post('v1/access/token', '\App\Http\Controllers\MpesaSTKPUSHController@generateAccessToken');
-
-Route::post('v1/mpesatest/stk/push', '\App\Http\Controllers\MpesaSTKPUSHController@STKPush');
+// Mpesa STK Push Routes
+Route::post('v1/mpesatest/stk/push', [MpesaSTKPUSHController::class, 'STKPush']);
+Route::post('v1/mpesatest/stk/confirm', [MpesaSTKPUSHController::class, 'STKConfirm']);
 
 // Braintree Routes
 Route::get('braintree/generate_token', [BraintreeController::class, 'generateToken']);
 Route::post('braintree', [BraintreeController::class, 'BrainTree']);
-
-
-
-// Route::group(['prefix' => 'api', 'as' => 'api.mpesa', 'namespace' => 'API\V1\Payments\Mpesa'], function () {
-//     Route::group(['as' => 'c2b'], function () {
-//         Route::get('m-trx/confirmation/{confirmation_key}', 'API\V1\Payments\Mpesa\C2bController@confirmTrx')->name('api.mpesa.c2b.confirm');
-//         Route::get('m-trx/validate/{validation_key}', 'API\V1\Payments\Mpesa\C2bController@validateTrx')->name('api.mpesa.c2b.validate');
-//     });
-// });

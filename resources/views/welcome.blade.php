@@ -39,18 +39,24 @@
             </div>
         </section>
 
-        <input id="nonce" name="nonce" type="hidden" />
+        <input id="nonce" name="nonce" type="hidden"/>
+
+        <input id="fname" name="fname" type="hidden" value="Ian" />
+        <input id="lname" name="lname" type="hidden" value="Kumu" />
+        <input id="email" name="email" type="hidden" value="ian.kumu@gmail.com" />
         <button class="button" type="submit"><span>Test Transaction</span></button>
     </form>
 </div>
-<script src="https://js.braintreegateway.com/web/dropin/1.26.0/js/dropin.min.js"></script>
+<script src="https://js.braintreegateway.com/web/dropin/1.29.0/js/dropin.min.js"></script>
 <script>
     var form = document.querySelector('#payment-form');
     var client_token = "{{$token}}";
 
+
+
     braintree.dropin.create({
         authorization: client_token,
-        selector: '#bt-dropin',
+        container: '#bt-dropin',
         paypal: {
             flow: 'vault'
         }
@@ -67,6 +73,8 @@
                     console.log('Request Payment Method Error', err);
                     return;
                 }
+
+                console.log(payload.nonce)
 
                 // Add the nonce to the form and submit
                 document.querySelector('#nonce').value = payload.nonce;
