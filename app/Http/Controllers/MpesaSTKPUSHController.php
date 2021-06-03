@@ -12,7 +12,7 @@ class MpesaSTKPUSHController extends Controller
 {
     public $result_code = 1;
     public $result_desc = 'An error occured';
-    // Generate an AccessToken using your Consumer Key and Consumer Secret
+    // Generate an AccessToken using the Consumer Key and Consumer Secret
     public function generateAccessToken()
     {
         $consumer_key = env('MPESA_CONSUMER_KEY');
@@ -29,7 +29,7 @@ class MpesaSTKPUSHController extends Controller
         $access_token = json_decode($curl_response);
         return $access_token->access_token;
     }
-    // Generate a base64  password using your Safaricom PassKey and the Business ShortCode to be used in the Mpesa Transaction
+    // Generate a base64  password using the Safaricom PassKey and the Business ShortCode to be used in the Mpesa Transaction
     public function LipaNaMpesaPassword()
     {
         $lipa_time = Carbon::rawParse('now')->format('YmdHms');
@@ -46,6 +46,11 @@ class MpesaSTKPUSHController extends Controller
 
         $amount = $request->input('amount');
         $phoneno = $request->input('phonenumber');
+
+        // Some validations for the phonenumber to format it to the required format
+        $phoneno = (substr($phoneno, 0, 1) == "+") ? str_replace("+", "", $phoneno) : $phoneno;
+        $phoneno = (substr($phoneno, 0, 1) == "0") ? preg_replace("/^0/", "254", $phoneno) : $phoneno;
+        $phoneno = (substr($phoneno, 0, 1) == "7") ? "254{$phoneno}" : $phoneno;
 
         $url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
         $curl = curl_init();
@@ -71,16 +76,16 @@ class MpesaSTKPUSHController extends Controller
         curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
         $curl_response = curl_exec($curl);
         $response = json_decode($curl_response, true);
-        // if (property_exists($response['ResponseCode'], '0')) {
+        // Store the merchant request id and the checkout id to the database
+        // This will be used to verify the response from Safaricom once the transaction is successful
         MpesaSTK::create([
             'merchant_request_id' =>  $response['MerchantRequestID'],
             'checkout_request_id' =>  $response['CheckoutRequestID']
         ]);
-        // }
         return $response;
     }
 
-
+    // This function is used to review the response from Safaricom once a transaction is complete
     public function STKConfirm(Request $request)
     {
         $stk_push_confirm = (new STKPush())->confirm($request);

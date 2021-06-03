@@ -5,7 +5,7 @@ namespace App\Mpesa;
 use App\Models\MpesaSTK;
 use Illuminate\Http\Request;
 
-// This Class is responsible of getting a response from Safaricom and Storing the Transaction Details to the Database
+// This Class is responsible for getting a response from Safaricom and Storing the Transaction Details to the Database
 class STKPush
 {
     public $failed = false;
@@ -27,8 +27,6 @@ class STKPush
 
             $stkPush = MpesaSTK::where('merchant_request_id', $merchant_request_id)
                 ->where('checkout_request_id', $checkout_request_id)->first();
-
-
 
             $data = [
                 'result_desc' => $result_desc,
