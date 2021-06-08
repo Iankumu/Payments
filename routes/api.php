@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BraintreeController;
 use App\Http\Controllers\MpesaSTKPUSHController;
+use App\Http\Controllers\PaypalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,3 +28,9 @@ Route::post('v1/mpesatest/stk/confirm', [MpesaSTKPUSHController::class, 'STKConf
 // Braintree Routes
 Route::get('braintree/generate_token', [BraintreeController::class, 'generateToken']);
 Route::post('braintree', [BraintreeController::class, 'BrainTree']);
+
+
+// Route::post('paypal', [PaypalController::class, 'initialize']);
+Route::post('paypal/create', [PaypalController::class, 'PayPal']);
+Route::get('paypal/approve', [PaypalController::class, 'approve']);
+Route::post('paypal/transaction/{id}', [PaypalController::class, 'Transaction']);

@@ -21,7 +21,6 @@ class CreateMpesaSTKSTable extends Migration
             $table->string('checkout_request_id')->nullable();
             $table->string('amount')->nullable();
             $table->string('mpesa_receipt_number')->nullable();
-            $table->string('b2c_utility_account_available_funds')->nullable();
             $table->string('transaction_date')->nullable();
             $table->string('phonenumber')->nullable();
             $table->timestamps();

@@ -3,6 +3,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BraintreeController;
+use App\Http\Controllers\PaypalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,3 +19,5 @@ use App\Http\Controllers\BraintreeController;
 Route::get('/', [BraintreeController::class, 'Frontend']);
 
 Route::post('/checkout', [BraintreeController::class, 'BrainTree']);
+
+Route::get('/paypal', [PaypalController::class, 'view']);
