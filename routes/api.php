@@ -30,7 +30,6 @@ Route::get('braintree/generate_token', [BraintreeController::class, 'generateTok
 Route::post('braintree', [BraintreeController::class, 'BrainTree']);
 
 
-// Route::post('paypal', [PaypalController::class, 'initialize']);
+//Paypal Routes
 Route::post('paypal/create', [PaypalController::class, 'PayPal']);
-Route::get('paypal/approve', [PaypalController::class, 'approve']);
 Route::post('paypal/transaction/{id}', [PaypalController::class, 'Transaction']);

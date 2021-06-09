@@ -99,8 +99,6 @@ class PaypalController extends Controller
             Log::error($err);
         } else {
             $result = json_decode($response, true);
-            // return redirect($result['links'][1]['href']);
-            // $this->Transaction($result['id']);
             return $result;
         }
     }
@@ -108,11 +106,9 @@ class PaypalController extends Controller
     public function Transaction($id)
     {
 
-        // $id = $request->input('id');
         $url = "https://api.sandbox.paypal.com/v2/checkout/orders/" . $id . "/capture";
 
         $curl = curl_init();
-
         curl_setopt_array($curl, array(
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
@@ -136,9 +132,12 @@ class PaypalController extends Controller
             Log::error($err);
         } else {
             $result = json_decode($response, true);
+
+            // Get the payer's names from the paypal's response
             $firstname = $result['payer']["name"]['given_name'];
             $surname = $result['payer']['name']['surname'];
 
+            // Get various transaction details from the response from paypal
             $paypal_transaction = [
                 'Transaction_id' => $result['id'],
                 'status' => $result['status'],
@@ -154,21 +153,13 @@ class PaypalController extends Controller
                 'paypal_fee' => $result['purchase_units'][0]['payments']['captures'][0]['seller_receivable_breakdown']['paypal_fee']['value'],
                 'net_amount' => $result['purchase_units'][0]['payments']['captures'][0]['seller_receivable_breakdown']['net_amount']['value']
             ];
+            // Add the paypal transaction details to the Database
             Paypal::create($paypal_transaction);
             return $result;
         }
     }
 
-    public function approve(Request $request)
-    {
-        $approve = $request->get('approve');
-
-        $response = Http::get($approve);
-        return $response;
-    }
-
-
-
+    // Used for testing
     public function view()
     {
         return view('paypal');
