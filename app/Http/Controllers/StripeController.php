@@ -13,6 +13,8 @@ class StripeController extends Controller
 
     public function Stripe(Request $request)
     {
+        $amount = $request->input('amount');
+        $name = $request->input('name');
 
         Stripe::setApiKey(env('STRIPE_API_KEY'));
         header('Content-Type: application/json');
@@ -21,9 +23,9 @@ class StripeController extends Controller
             'line_items' => [[
                 'price_data' => [
                     'currency' => 'usd',
-                    'unit_amount' => 2000, //Smallest Denomination. In this case it is worth $20
+                    'unit_amount' => $this->format_amount($amount), //Smallest Denomination. In this case it is worth $20
                     'product_data' => [
-                        'name' => 'Stubborn Attachments',
+                        'name' => $name,
                         'images' => ["https://i.imgur.com/EHyR2nP.png"],
                     ],
                 ],
@@ -38,5 +40,9 @@ class StripeController extends Controller
 
     public function line_items()
     {
+    }
+    public function format_amount($amount)
+    {
+        return $amount * 100; //This case it is in USD
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Paypal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
@@ -135,6 +136,25 @@ class PaypalController extends Controller
             Log::error($err);
         } else {
             $result = json_decode($response, true);
+            $firstname = $result['payer']["name"]['given_name'];
+            $surname = $result['payer']['name']['surname'];
+
+            $paypal_transaction = [
+                'Transaction_id' => $result['id'],
+                'status' => $result['status'],
+                'payer_name' => $firstname . ' ' . $surname,
+                'email' => $result['payer']['email_address'],
+                'payer_id' => $result['payer']['payer_id'],
+                'payer_country_code' => $result['payer']['address']['country_code'],
+                'reference_id' => $result['purchase_units'][0]['reference_id'],
+                'payment_id' => $result['purchase_units'][0]['payments']['captures'][0]['id'],
+                'payment_status' => $result['purchase_units'][0]['payments']['captures'][0]['status'],
+                'currency_code' => $result['purchase_units'][0]['payments']['captures'][0]['amount']['currency_code'],
+                'amount' => $result['purchase_units'][0]['payments']['captures'][0]['amount']['value'],
+                'paypal_fee' => $result['purchase_units'][0]['payments']['captures'][0]['seller_receivable_breakdown']['paypal_fee']['value'],
+                'net_amount' => $result['purchase_units'][0]['payments']['captures'][0]['seller_receivable_breakdown']['net_amount']['value']
+            ];
+            Paypal::create($paypal_transaction);
             return $result;
         }
     }

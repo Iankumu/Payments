@@ -57,9 +57,6 @@
     braintree.dropin.create({
         authorization: client_token,
         container: '#bt-dropin',
-        paypal: {
-            flow: 'vault'
-        }
     }, function (createErr, instance) {
         if (createErr) {
             console.log('Create Error', createErr);
