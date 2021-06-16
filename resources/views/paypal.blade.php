@@ -35,7 +35,7 @@ paypal.Buttons({
 
         /* Set up a url on your server to create the order */
 
-        var CREATE_URL = 'https://1437f2853dd2.ngrok.io/api/paypal/create';
+        var CREATE_URL = 'https://37bd1cd74363.ngrok.io/api/paypal/create';
 
 
         /* Make a call to your server to set up the payment */
@@ -58,7 +58,7 @@ paypal.Buttons({
 
         /* Set up a url on your server to execute the payment */
 
-        var EXECUTE_URL = 'https://1437f2853dd2.ngrok.io/api/paypal/transaction/'+data.orderID;
+        var EXECUTE_URL = 'https://37bd1cd74363.ngrok.io/api/paypal/transaction/'+data.orderID;
 
         /* Set up the data you need to pass to your server */
 
