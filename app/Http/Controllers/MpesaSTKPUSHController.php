@@ -100,4 +100,29 @@ class MpesaSTKPUSHController extends Controller
             'ResultDesc' => $this->result_desc
         ]);
     }
+
+
+    public function query(Request $request)
+    {
+        $checkoutRequestId = $request->input('CheckoutRequestID');
+        $curl_post_data = [
+            'BusinessShortCode' => env('MPESA_BUSINESS_SHORTCODE'),
+            'Password' => $this->lipaNaMpesaPassword(),
+            'Timestamp' => Carbon::rawParse('now')->format('YmdHms'),
+            'CheckoutRequestID' => $checkoutRequestId
+        ];
+
+        $postdata = json_encode($curl_post_data);
+        $url = 'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query';
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->generateAccessToken()));
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $curl_response = curl_exec($ch);
+        curl_close($ch);
+        $response = json_decode($curl_response, true);
+        return $response;
+    }
 }
