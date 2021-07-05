@@ -23,7 +23,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 // Mpesa STK Push Routes
 Route::post('v1/mpesatest/stk/push', [MpesaSTKPUSHController::class, 'STKPush']);
-Route::post('v1/callback/confirm', [MpesaSTKPUSHController::class, 'STKConfirm']);
+Route::post('v1/confirm', [MpesaSTKPUSHController::class, 'STKConfirm'])->name('mpesa.confirm');
 Route::post('v1/callback/query', [MpesaSTKPUSHController::class, 'query']);
 
 // Braintree Routes

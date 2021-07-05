@@ -55,7 +55,7 @@ class MpesaSTKPUSHController extends Controller
         $url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->generateAccessToken()));
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Authorization: Bearer ' . $this->generateAccessToken()));
         $curl_post_data = [
             //Fill in the request parameters with valid values
             'BusinessShortCode' => env('MPESA_BUSINESS_SHORTCODE'), //Has to be a paybill and not a till number since it is not supported
@@ -66,11 +66,12 @@ class MpesaSTKPUSHController extends Controller
             'PartyA' => $phoneno, // replace this with your phone number
             'PartyB' =>  env('MPESA_BUSINESS_SHORTCODE'),
             'PhoneNumber' => $phoneno, // replace this with your phone number
-            'CallBackURL' => env('MPESA_CALLBACK_URL') . '/api/v1/callback/confirm', //url should be https and should not contain keywords such as mpesa,safaricom etc
+            'CallBackURL' => route('mpesa.confirm'), //url should be https and should not contain keywords such as mpesa,safaricom etc
             'AccountReference' => "Testing", //Account Number to a paybill..Maximum of 12 Characters.
             'TransactionDesc' => "Payment" //Maximum of 13 Characters.
         ];
-        $data_string = json_encode($curl_post_data);
+        // Encodes the array to a json string while escaping the multiple foward slashes in the callback url
+        $data_string = json_encode($curl_post_data, JSON_UNESCAPED_SLASHES);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
