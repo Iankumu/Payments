@@ -25,6 +25,7 @@ class BraintreeController extends Controller
         return $clientToken;
     }
 
+    // initiate a transaction
     public function BrainTree(Request $request)
     {
 

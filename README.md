@@ -1,61 +1,109 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+## Payments API
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+This is an API implementation of the various Payment Gateways including `Mpesa STK Push`, `Paypal` and `Braintree`.
 
-## About Laravel
+## Setup
+To run this project locally clone the repository and in the project directory,run the following commands:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+```
+$ cp.env.example .env
+$ composer install
+$ php artisan key:generate
+$ php artisan migrate
+$ php artisan serve
+```
+## Payment Gateways
+The application consists of a couple of endpoints that facilitate the capture and settling of the payments
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Mpesa STK Push
+-   #### **Simulate a Transaction**
+This resource consists the implementation of the Mpesa Express API. The endpoint for the resource is `POST` `/api/v1/mpesatest/stk/push`. It is responsible for simulating the transaction and sending the payment prompt to a specific phone number.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Before any simulation, there are some configurations that are required for the API to function seamlessly. These configurations and variables include:
+- Safaricom PassKey(Provided by Safaricom)
+- MPESA Business Shortcode(This is the paybill number) `174379` for testing purposes
+- MPESA Consumer Key(Provided by Safaricom)
+- MPESA Consumer Secret(Provided by Safaricom)
+These variables are required to be added on the .env file
 
-## Learning Laravel
+Some of the inputs required include:
+- amount
+- phonenumber
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+The resource performs formatting the phone number into the required format before initiating the payment request
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Upon Success the transaction details will be stored in the database.
 
-## Laravel Sponsors
+-   #### **Query a Transaction**
+This resource is responsible for querying the status of a transaction. It is accessed through the `POST` `/api/v1/callback/query` endpoint.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+The input required is
+- CheckoutRequestID
 
-### Premium Partners
+It returns the details of the transaction whether it was successful or cancelled.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[OP.GG](https://op.gg)**
+### Paypal
+This resource consists of the implementation of Paypal checkout API. Some of the configurations required include:
+- Paypal Client Id
+- Paypal Client Secret
+They are provided by paypal and are required to be added on the .env file
 
-## Contributing
+-   #### **Initiate a Transaction**
+To initiate a transaction, the `POST` `/api/paypal/create` endpoint has to be accessed. The input required is
+- amount
+This will fire the paypal checkout API which will return a response containing various links and the transaction ID.
+The sample response is in the format below:
+```
+    {
+        "id": "8NG28868RK554011N",
+        "status": "CREATED",
+        "links": [
+            {
+                "href": "https://api.sandbox.paypal.com/v2/checkout/orders/8NG28868RK554011N",
+                "rel": "self",
+                "method": "GET"
+            },
+            {
+                "href": "https://www.sandbox.paypal.com/checkoutnow?token=8NG28868RK554011N",
+                "rel": "approve",
+                "method": "GET"
+            },
+            {
+                "href": "https://api.sandbox.paypal.com/v2/checkout/orders/8NG28868RK554011N",
+                "rel": "update",
+                "method": "PATCH"
+            },
+            {
+                "href": "https://api.sandbox.paypal.com/v2/checkout/orders/8NG28868RK554011N/capture",
+                "rel": "capture",
+                "method": "POST"
+            }
+        ]
+    }
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```
 
-## Code of Conduct
+To capture the transaction, it has to be approved and this is done by accessing the approve link present in the response.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+-   #### **Process the Transaction**
+Once the transaction has been approved, It can be processed for capture in the `POST` `/api/paypal/transaction/{id}` endpoint. The id required in this case is the transaction id  provided by paypal. This will then capture the required amount from a client and send them to the paypal merchant's account and also store the transaction details to the database upon success.
 
-## Security Vulnerabilities
+### Braintree
+Consists of the braintree implementation which captures credit/debit card payments.
+Some configurations required include:
+- Braintree Environment
+- Braintree Merchant ID
+- Braintree Public Key
+- Braintree Private Key
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+They are all provided by Braintree and should be added to the .env file
+-   #### **Initiate a Transaction**
+To initiate a transaction, the endpoint `POST` `/api/braintree` has to be accessed.
+The Inputs required include:
+- nonce (This is a payment method available in Braintree e.g paypal,card etc)
+- amount
+- fname (First name of the Client)
+- lname (Last name of the Client)
+- email (Email of the Client)
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The Transaction is executed and the records can be viewed on the Braintree dashboard

@@ -103,6 +103,7 @@ class MpesaSTKPUSHController extends Controller
     }
 
 
+    // Used to query the status of an STK Push Transaction
     public function query(Request $request)
     {
         $checkoutRequestId = $request->input('CheckoutRequestID');
