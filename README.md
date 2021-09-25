@@ -27,8 +27,8 @@ Before any simulation, there are some configurations that are required for the A
 These variables are required to be added on the .env file
 
 Some of the inputs required include:
-- amount
-- phonenumber
+ -  amount
+ -  phonenumber
 
 The resource performs formatting the phone number into the required format before initiating the payment request
 
@@ -38,7 +38,7 @@ Upon Success the transaction details will be stored in the database.
 This resource is responsible for querying the status of a transaction. It is accessed through the `POST` `/api/v1/callback/query` endpoint.
 
 The input required is
-- CheckoutRequestID
+ -  CheckoutRequestID
 
 It returns the details of the transaction whether it was successful or cancelled.
 
@@ -50,7 +50,7 @@ They are provided by paypal and are required to be added on the .env file
 
 -   #### **Initiate a Transaction**
 To initiate a transaction, the `POST` `/api/paypal/create` endpoint has to be accessed. The input required is
-- amount
+ -  amount
 This will fire the paypal checkout API which will return a response containing various links and the transaction ID.
 The sample response is in the format below:
 ```
@@ -100,10 +100,10 @@ They are all provided by Braintree and should be added to the .env file
 -   #### **Initiate a Transaction**
 To initiate a transaction, the endpoint `POST` `/api/braintree` has to be accessed.
 The Inputs required include:
-- nonce (This is a payment method available in Braintree e.g paypal,card etc)
-- amount
-- fname (First name of the Client)
-- lname (Last name of the Client)
-- email (Email of the Client)
+ - nonce (This is a payment method available in Braintree e.g paypal,card etc)
+ - amount
+ - fname (First name of the Client)
+ - lname (Last name of the Client)
+ - email (Email of the Client)
 
 The Transaction is executed and the records can be viewed on the Braintree dashboard
