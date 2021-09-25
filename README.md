@@ -17,22 +17,22 @@ The application consists of a couple of endpoints that facilitate the capture an
 
 ### Mpesa STK Push
 -   #### **Simulate a Transaction**
-        This resource consists the implementation of the Mpesa Express API. The endpoint for the resource is `POST` `/api/v1/mpesatest/stk/push`. It is responsible for simulating the transaction and sending the payment prompt to a specific phone number.
+    This resource consists the implementation of the Mpesa Express API. The endpoint for the resource is `POST` `/api/v1/mpesatest/stk/push`. It is responsible for simulating the transaction and sending the payment prompt to a specific phone number.
 
-        Before any simulation, there are some configurations that are required for the API to function seamlessly. These configurations and variables include:
-        - Safaricom PassKey(Provided by Safaricom)
-        - MPESA Business Shortcode(This is the paybill number) `174379` for testing purposes
-        - MPESA Consumer Key(Provided by Safaricom)
-        - MPESA Consumer Secret(Provided by Safaricom)
-        These variables are required to be added on the .env file
+    Before any simulation, there are some configurations that are required for the API to function seamlessly. These configurations and variables include:
+    - Safaricom PassKey(Provided by Safaricom)
+    - MPESA Business Shortcode(This is the paybill number) `174379` for testing purposes
+    - MPESA Consumer Key(Provided by Safaricom)
+    - MPESA Consumer Secret(Provided by Safaricom)
+    These variables are required to be added on the .env file
 
-        Some of the inputs required include:
-        -  amount
-        -  phonenumber
+    Some of the inputs required include:
+    -  amount
+    -  phonenumber
 
-        The resource performs formatting the phone number into the required format before initiating the payment request
+    The resource performs formatting the phone number into the required format before initiating the payment request
 
-        Upon Success the transaction details will be stored in the database.
+    Upon Success the transaction details will be stored in the database.
 
     -   #### **Query a Transaction**
         This resource is responsible for querying the status of a transaction. It is accessed through the `POST` `/api/v1/callback/query` endpoint.
