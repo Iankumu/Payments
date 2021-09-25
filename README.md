@@ -51,6 +51,7 @@ They are provided by paypal and are required to be added on the .env file
 -   #### **Initiate a Transaction**
 To initiate a transaction, the `POST` `/api/paypal/create` endpoint has to be accessed. The input required is
  -  amount
+ 
 This will fire the paypal checkout API which will return a response containing various links and the transaction ID.
 The sample response is in the format below:
 ```
