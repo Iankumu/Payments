@@ -99,12 +99,12 @@ Some configurations required include:
 
 They are all provided by Braintree and should be added to the .env file
 -   #### **Initiate a Transaction**
-    To initiate a transaction, the endpoint `POST` `/api/braintree` has to be accessed.
-    The Inputs required include:
-    - nonce (This is a payment method available in Braintree e.g paypal,card etc)
-    - amount
-    - fname (First name of the Client)
-    - lname (Last name of the Client)
-    - email (Email of the Client)
+To initiate a transaction, the endpoint `POST` `/api/braintree` has to be accessed.
+The Inputs required include:
+   - nonce (This is a payment method available in Braintree e.g paypal,card etc)
+   - amount
+   - fname (First name of the Client)
+   - lname (Last name of the Client)
+   - email (Email of the Client)
 
-    The Transaction is executed and the records can be viewed on the Braintree dashboard
+The Transaction is executed and the records can be viewed on the Braintree dashboard
