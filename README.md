@@ -52,7 +52,7 @@ The configuration required is:
     It is accessed through the `GET` `/api/register-urls` endpoint.
 
 -   #### **Simulate a Transaction**
-    This response is responsible for making payment requests from a Client to a Business.
+    This resource is responsible for making payment requests from a Client to a Business.
     It is accessed through the `POST` `/api/c2b/simulate` enpoint. In this instance, the API supports the Paybill service of requesting funds.
     Inputs required include:
     - phonenumber
