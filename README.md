@@ -57,7 +57,7 @@ The configuration required is:
     Inputs required include:
     - phonenumber
     - amount
-    - account (account_number to a paybill)
+    - account (Account Number to a paybill)
 
     It captures the funds and tranfers them to the merchant's business shortcode and then stores the transaction details to the database upon success.
 
