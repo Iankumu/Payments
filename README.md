@@ -1,6 +1,6 @@
 ## Payments API
 
-This is an API implementation of the various Payment Gateways including `Mpesa STK Push`, `Paypal` and `Braintree`.
+This is an API implementation of the various Payment Gateways including `Mpesa`, `Paypal` and `Braintree`.
 
 ## Setup
 To run this project locally clone the repository and in the project directory,run the following commands:
@@ -41,6 +41,25 @@ The application consists of a couple of endpoints that facilitate the capture an
         -  CheckoutRequestID
 
         It returns the details of the transaction whether it was successful or cancelled.
+
+### Mpesa C2B
+This API is responsible for tranfer of funds from Client to Business. It supports both Paybill and Buy Goods services.
+The configuration required is:   
+-   MPESA Business Shortcode(This is a Paybill number or a Till Number)
+
+-   #### **Register URL**
+    This resource is responsible for registering the confirmation and validation urls on Mpesa which will then be used to receive the payment responses.
+    It is accessed through the `GET` `/api/register-urls` endpoint.
+
+-   #### **Simulate a Transaction**
+    This response is responsible for making payment requests from a Client to a Business.
+    It is accessed through the `POST` `/api/c2b/simulate` enpoint. In this instance, the API supports the Paybill service of requesting funds.
+    Inputs required include:
+    - phonenumber
+    - amount
+    - account (account_number to a paybill)
+
+    It captures the funds and tranfers them to the merchant's business shortcode and then stores the transaction details to the database upon success.
 
 ### Paypal
 This resource consists of the implementation of Paypal checkout API. Some of the configurations required include:

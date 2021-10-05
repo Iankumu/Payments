@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BraintreeController;
+use App\Http\Controllers\MPESAC2BController;
 use App\Http\Controllers\MpesaSTKPUSHController;
 use App\Http\Controllers\PaypalController;
 
@@ -34,3 +35,9 @@ Route::post('braintree', [BraintreeController::class, 'BrainTree']);
 //Paypal Routes
 Route::post('paypal/create', [PaypalController::class, 'PayPal']);
 Route::post('paypal/transaction/{id}', [PaypalController::class, 'Transaction']);
+
+//MPESA C2B
+Route::get('register-urls',[MPESAC2BController::class,'registerURLS']);
+Route::post('c2b/simulate',[MPESAC2BController::class,'simulate']);
+Route::post('validation',[MPESAC2BController::class,'validation'])->name('c2b.validate');
+Route::post('confirmation',[MPESAC2BController::class,'confirmation'])->name('c2b.confirm');
