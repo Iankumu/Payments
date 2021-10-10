@@ -11,7 +11,11 @@ trait Mpesa{
         $consumer_key = env('MPESA_CONSUMER_KEY');
         $consumer_secret = env('MPESA_CONSUMER_SECRET');
         $credentials = base64_encode($consumer_key . ":" . $consumer_secret);
-        $url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+
+        $url =env('MPESA_ENVIRONMENT') == 'sandbox'
+        ?"https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+        :"https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array("Authorization: Basic " . $credentials));
@@ -51,5 +55,16 @@ trait Mpesa{
         $timestamp = $lipa_time;
         $lipa_na_mpesa_password = base64_encode($BusinessShortCode . $passkey . $timestamp);
         return $lipa_na_mpesa_password;
+    }
+
+    public function phoneValidator($phoneno)
+    {
+         // Some validations for the phonenumber to format it to the required format
+         $phoneno = (substr($phoneno, 0, 1) == "+") ? str_replace("+", "", $phoneno) : $phoneno;
+         $phoneno = (substr($phoneno, 0, 1) == "0") ? preg_replace("/^0/", "254", $phoneno) : $phoneno;
+         $phoneno = (substr($phoneno, 0, 1) == "7") ? "254{$phoneno}" : $phoneno;
+
+         return $phoneno;
+
     }
 }

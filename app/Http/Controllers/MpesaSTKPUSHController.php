@@ -22,12 +22,11 @@ class MpesaSTKPUSHController extends Controller
         $amount = $request->input('amount');
         $phoneno = $request->input('phonenumber');
 
-        // Some validations for the phonenumber to format it to the required format
-        $phoneno = (substr($phoneno, 0, 1) == "+") ? str_replace("+", "", $phoneno) : $phoneno;
-        $phoneno = (substr($phoneno, 0, 1) == "0") ? preg_replace("/^0/", "254", $phoneno) : $phoneno;
-        $phoneno = (substr($phoneno, 0, 1) == "7") ? "254{$phoneno}" : $phoneno;
+    //    dd($this->phoneValidator($phoneno));
+        $url = env('MPESA_ENVIRONMENT') == 'sandbox'
+        ?'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+        :'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
-        $url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json', 'Authorization: Bearer ' . $this->generateAccessToken()));
@@ -38,13 +37,14 @@ class MpesaSTKPUSHController extends Controller
             'Timestamp' => Carbon::rawParse('now')->format('YmdHms'),
             'TransactionType' => 'CustomerPayBillOnline',
             'Amount' => $amount,
-            'PartyA' => $phoneno, // replace this with your phone number
+            'PartyA' => $this->phoneValidator($phoneno), // replace this with your phone number
             'PartyB' =>  env('MPESA_BUSINESS_SHORTCODE'),
-            'PhoneNumber' => $phoneno, // replace this with your phone number
+            'PhoneNumber' => $this->phoneValidator($phoneno), // replace this with your phone number
             'CallBackURL' => route('mpesa.confirm'), //url should be https and should not contain keywords such as mpesa,safaricom etc
             'AccountReference' => "Testing", //Account Number to a paybill..Maximum of 12 Characters.
             'TransactionDesc' => "Payment" //Maximum of 13 Characters.
         ];
+        // dd($curl_post_data);
         // Encodes the array to a json string while escaping the multiple foward slashes in the callback url
         $data_string = json_encode($curl_post_data, JSON_UNESCAPED_SLASHES);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -89,7 +89,9 @@ class MpesaSTKPUSHController extends Controller
             'CheckoutRequestID' => $checkoutRequestId
         ];
 
-        $url = 'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query';
+        $url =env('MPESA_ENVIRONMENT') == 'sandbox'
+        ?'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query'
+        :'https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query';
         $curl_response = $this->MpesaRequest($url,$curl_post_data);
         $response = json_decode($curl_response, true);
         return $response;

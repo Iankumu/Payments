@@ -20,7 +20,9 @@ class MPESAC2BController extends Controller
             "ConfirmationURL"=>route('c2b.confirm'),//url should be https and should not contain keywords such as mpesa,safaricom etc
             "ValidationURL"=> route('c2b.validate'),//url should be https and should not contain keywords such as mpesa,safaricom etc
         ];
-        $url = 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+        $url = env('MPESA_ENVIRONMENT') == 'sandbox'
+        ?'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl'
+        :'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl';
 
         $response = $this->MpesaRequest($url,$body);
         return $response;
@@ -40,7 +42,9 @@ class MPESAC2BController extends Controller
             'ShortCode'=>env('MPESA_BUSINESS_SHORTCODE')
         ];
         // dd($data);
-        $url = 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/simulate';
+        $url =env('MPESA_ENVIRONMENT') == 'sandbox'
+        ?'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/simulate'
+        :'https://api.safaricom.co.ke/mpesa/c2b/v1/simulate';
 
         $response = $this->MpesaRequest($url,$data);
         return $response;
