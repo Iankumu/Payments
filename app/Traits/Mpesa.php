@@ -65,6 +65,17 @@ trait Mpesa{
          $phoneno = (substr($phoneno, 0, 1) == "7") ? "254{$phoneno}" : $phoneno;
 
          return $phoneno;
-
+    }
+    public function generate_security_credential($path,$pass)
+    {
+        $pubkeyFile =$path;
+        $pubKey = '';
+        if(is_file($pubkeyFile)){
+            $pubKey = file_get_contents($pubkeyFile);
+        }else{
+            throw new \Exception("Please provide a valid public key file");
+        }
+        openssl_public_encrypt($pass, $encrypted, $pubKey, OPENSSL_PKCS1_PADDING);
+        return base64_encode($encrypted);
     }
 }

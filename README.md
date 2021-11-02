@@ -58,6 +58,7 @@ The configuration required is:
     - phonenumber
     - amount
     - account (Account Number to a paybill)
+    - shortcode (Paybill or a Till Number)
 
     It captures the funds and tranfers them to the merchant's business shortcode and then stores the transaction details to the database upon success.
 

@@ -33,13 +33,14 @@ class MPESAC2BController extends Controller
         $phonenumber = $request->input('phonenumber');
         $amount = $request->input('amount');
         $account = $request->input('account');
+        $shortcode = $request->input('shortcode');
 
         $data = [
             'Msisdn'=>$phonenumber,
             'Amount'=>(int) $amount,
             'BillRefNumber'=>$account, //Account number for a paybill
             'CommandID'=>'CustomerPayBillOnline', //Can also be CustomerBuyGoodsOnline for a till number
-            'ShortCode'=>env('MPESA_BUSINESS_SHORTCODE')
+            'ShortCode'=> $shortcode// Paybill or Till Number
         ];
         // dd($data);
         $url =env('MPESA_ENVIRONMENT') == 'sandbox'
