@@ -6,6 +6,7 @@ use App\Http\Controllers\BraintreeController;
 use App\Http\Controllers\MPESAC2BController;
 use App\Http\Controllers\MpesaSTKPUSHController;
 use App\Http\Controllers\PaypalController;
+use App\Http\Controllers\MPESAB2CController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +38,12 @@ Route::post('paypal/create', [PaypalController::class, 'PayPal']);
 Route::post('paypal/transaction/{id}', [PaypalController::class, 'Transaction']);
 
 //MPESA C2B
-Route::get('register-urls',[MPESAC2BController::class,'registerURLS']);
+Route::post('register-urls',[MPESAC2BController::class,'registerURLS']);
 Route::post('c2b/simulate',[MPESAC2BController::class,'simulate']);
 Route::post('validation',[MPESAC2BController::class,'validation'])->name('c2b.validate');
 Route::post('confirmation',[MPESAC2BController::class,'confirmation'])->name('c2b.confirm');
+
+// MPESA B2C
+Route::post('v1/b2c/simulate', [MPESAB2CController::class,'simulate']);
+Route::post('v1/b2c/result', [MPESAB2CController::class,'result'])->name('b2c.result');
+Route::post('v1/b2c/timeout', [MPESAB2CController::class,'timeout'])->name('b2c.timeout');

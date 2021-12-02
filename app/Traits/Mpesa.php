@@ -66,16 +66,66 @@ trait Mpesa{
 
          return $phoneno;
     }
-    public function generate_security_credential($path,$pass)
+    public function generate_public_key()
     {
-        $pubkeyFile =$path;
-        $pubKey = '';
-        if(is_file($pubkeyFile)){
-            $pubKey = file_get_contents($pubkeyFile);
-        }else{
-            throw new \Exception("Please provide a valid public key file");
+
+        if(env('MPESA_ENVIRONMENT') == 'sandbox')
+        {
+            $pub_key=openssl_pkey_get_public(file_get_contents(public_path('SandboxCertificate.cer')));
+            $keyData = openssl_pkey_get_details($pub_key);
+            file_put_contents(public_path('key.pub'), $keyData['key']);
+            return true;
         }
-        openssl_public_encrypt($pass, $encrypted, $pubKey, OPENSSL_PKCS1_PADDING);
-        return base64_encode($encrypted);
+        else
+        {
+            $pub_key=openssl_pkey_get_public(file_get_contents(public_path('ProductionCertificate.cer')));
+            $keyData = openssl_pkey_get_details($pub_key);
+            file_put_contents(public_path('prod.pub'), $keyData['prod']);
+            return true;
+        }
     }
+
+    public function generate_security_credential($pass)
+    {
+        if(env('MPESA_ENVIRONMENT') == 'sandbox')
+        {
+            $path = public_path('key.pub');
+            $isExists = file_exists($path);
+            if($isExists != 1)
+            {
+                $this->generate_public_key();
+            }
+            $pk = openssl_pkey_get_public($this->getPublicKey());
+            openssl_public_encrypt($pass, $encrypted, $pk, OPENSSL_PKCS1_PADDING);
+            return base64_encode($encrypted);
+        }
+        else
+        {
+            $path = public_path('prod.pub');
+            $isExists = file_exists($path);
+            if($isExists != 1)
+            {
+                $this->generate_public_key();
+            }
+            $pk = openssl_pkey_get_public($this->getPublicKey());
+            openssl_public_encrypt($pass, $encrypted, $pk, OPENSSL_PKCS1_PADDING);
+            return base64_encode($encrypted);
+        }
+    }
+
+    public function getPublicKey()
+    {
+        if(env('MPESA_ENVIRONMENT') == 'sandbox')
+        {
+            $key = file_get_contents(public_path('key.pub'));
+            return $key;
+        }
+        else
+        {
+            $key = file_get_contents(public_path('prod.pub'));
+            return $key;
+        }
+    }
+
+
 }

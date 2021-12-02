@@ -48,8 +48,10 @@ The configuration required is:
 -   MPESA Business Shortcode(This is a Paybill number or a Till Number)
 
 -   #### **Register URL**
-    This resource is responsible for registering the confirmation and validation urls on Mpesa which will then be used to receive the payment responses.
-    It is accessed through the `GET` `/api/register-urls` endpoint.
+    This resource is responsible for registering the confirmation and validation urls on Mpesa which will then be used to receive the payment responses.It attaches the urls to a specific Paybill/Till Number and as a result when payment is initiated on the Paybill/Till Number, the response is sent to the preferred url.
+    It is accessed through the `POST` `/api/register-urls` endpoint.
+    Input required:
+    - shortcode (Paybill or a Till Number)
 
 -   #### **Simulate a Transaction**
     This resource is responsible for making payment requests from a Client to a Business.
@@ -61,6 +63,22 @@ The configuration required is:
     - shortcode (Paybill or a Till Number)
 
     It captures the funds and tranfers them to the merchant's business shortcode and then stores the transaction details to the database upon success.
+
+### MPESA B2C
+This API is responsible for transfer of funds from a Business to Clients. This can be inform of `Salary`,`Promotion` or `Business Payment`.The configurations required are:
+-   Mpesa Initiator Password (Obtained from Safaricom)   
+-   Mpesa Initiator Name (Obtained from Safaricom)   
+-   Business Short Code   
+-   Mpesa API Certificates(Sandbox or Production)   
+
+-   #### **Simulate a Transaction**
+    This resource is responsible for initiating a transaction.It is accessed through the `POST` `api/v1/b2c/simulate` endpoint. Inputs required include:
+    -   phonenumber(For the recipient)
+    -   amount
+    -   remarks(Information associated with the transaction)
+    -   occasion(Additional Information associated with the transaction)
+
+    When Successful, funds are moved from the business shortcode to the phonenumber attached to the body of the request and a transaction response is returned to the server.
 
 ### Paypal
 This resource consists of the implementation of Paypal checkout API. Some of the configurations required include:
