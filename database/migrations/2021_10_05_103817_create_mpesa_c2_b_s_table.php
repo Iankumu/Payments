@@ -26,8 +26,6 @@ class CreateMpesaC2BSTable extends Migration
             $table->string('ThirdParty_Transaction_ID')->nullable();
             $table->string('Phonenumber')->nullable();
             $table->string('FirstName')->nullable();
-            $table->string('MiddleName')->nullable();
-            $table->string('LastName')->nullable();
             $table->timestamps();
         });
     }

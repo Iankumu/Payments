@@ -2,19 +2,21 @@
 
 namespace App\Traits;
 
+use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 
-trait Mpesa{
-// Generate an AccessToken using the Consumer Key and Consumer Secret
+trait Mpesa
+{
+    // Generate an AccessToken using the Consumer Key and Consumer Secret
     public function generateAccessToken()
     {
         $consumer_key = env('MPESA_CONSUMER_KEY');
         $consumer_secret = env('MPESA_CONSUMER_SECRET');
         $credentials = base64_encode($consumer_key . ":" . $consumer_secret);
 
-        $url =env('MPESA_ENVIRONMENT') == 'sandbox'
-        ?"https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
-        :"https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+        $url = env('MPESA_ENVIRONMENT') == 'sandbox'
+            ? "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+            : "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
@@ -28,12 +30,12 @@ trait Mpesa{
     }
 
     // Common Curl Format Of The Mpesa APIs.
-    public function MpesaRequest($url,$body)
+    public function MpesaRequest($url, $body)
     {
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Bearer '. $this->generateAccessToken(),
+            'Authorization: Bearer ' . $this->generateAccessToken(),
             'Content-Type: application/json'
         ]);
 
@@ -59,26 +61,23 @@ trait Mpesa{
 
     public function phoneValidator($phoneno)
     {
-         // Some validations for the phonenumber to format it to the required format
-         $phoneno = (substr($phoneno, 0, 1) == "+") ? str_replace("+", "", $phoneno) : $phoneno;
-         $phoneno = (substr($phoneno, 0, 1) == "0") ? preg_replace("/^0/", "254", $phoneno) : $phoneno;
-         $phoneno = (substr($phoneno, 0, 1) == "7") ? "254{$phoneno}" : $phoneno;
+        // Some validations for the phonenumber to format it to the required format
+        $phoneno = (substr($phoneno, 0, 1) == "+") ? str_replace("+", "", $phoneno) : $phoneno;
+        $phoneno = (substr($phoneno, 0, 1) == "0") ? preg_replace("/^0/", "254", $phoneno) : $phoneno;
+        $phoneno = (substr($phoneno, 0, 1) == "7") ? "254{$phoneno}" : $phoneno;
 
-         return $phoneno;
+        return $phoneno;
     }
     public function generate_public_key()
     {
 
-        if(env('MPESA_ENVIRONMENT') == 'sandbox')
-        {
-            $pub_key=openssl_pkey_get_public(file_get_contents(public_path('SandboxCertificate.cer')));
+        if (env('MPESA_ENVIRONMENT') == 'sandbox') {
+            $pub_key = openssl_pkey_get_public(file_get_contents(public_path('SandboxCertificate.cer')));
             $keyData = openssl_pkey_get_details($pub_key);
             file_put_contents(public_path('key.pub'), $keyData['key']);
             return true;
-        }
-        else
-        {
-            $pub_key=openssl_pkey_get_public(file_get_contents(public_path('ProductionCertificate.cer')));
+        } else {
+            $pub_key = openssl_pkey_get_public(file_get_contents(public_path('ProductionCertificate.cer')));
             $keyData = openssl_pkey_get_details($pub_key);
             file_put_contents(public_path('prod.pub'), $keyData['prod']);
             return true;
@@ -87,24 +86,19 @@ trait Mpesa{
 
     public function generate_security_credential($pass)
     {
-        if(env('MPESA_ENVIRONMENT') == 'sandbox')
-        {
+        if (env('MPESA_ENVIRONMENT') == 'sandbox') {
             $path = public_path('key.pub');
             $isExists = file_exists($path);
-            if($isExists != 1)
-            {
+            if ($isExists != 1) {
                 $this->generate_public_key();
             }
             $pk = openssl_pkey_get_public($this->getPublicKey());
             openssl_public_encrypt($pass, $encrypted, $pk, OPENSSL_PKCS1_PADDING);
             return base64_encode($encrypted);
-        }
-        else
-        {
+        } else {
             $path = public_path('prod.pub');
             $isExists = file_exists($path);
-            if($isExists != 1)
-            {
+            if ($isExists != 1) {
                 $this->generate_public_key();
             }
             $pk = openssl_pkey_get_public($this->getPublicKey());
@@ -115,17 +109,24 @@ trait Mpesa{
 
     public function getPublicKey()
     {
-        if(env('MPESA_ENVIRONMENT') == 'sandbox')
-        {
+        if (env('MPESA_ENVIRONMENT') == 'sandbox') {
             $key = file_get_contents(public_path('key.pub'));
             return $key;
-        }
-        else
-        {
+        } else {
             $key = file_get_contents(public_path('prod.pub'));
             return $key;
         }
     }
 
-
+    public function validationResponse($result_code, $result_description)
+    {
+        $result = json_encode([
+            "ResultCode" => $result_code,
+            "ResultDesc" => $result_description
+        ]);
+        $response = new Response();
+        $response->headers->set("Content-Type", "application/json; charset=utf-8");
+        $response->setContent($result);
+        return $response;
+    }
 }
