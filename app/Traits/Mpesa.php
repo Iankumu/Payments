@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\File;
 
 trait Mpesa
 {
@@ -68,54 +69,16 @@ trait Mpesa
 
         return $phoneno;
     }
-    public function generate_public_key()
-    {
 
-        if (env('MPESA_ENVIRONMENT') == 'sandbox') {
-            $pub_key = openssl_pkey_get_public(file_get_contents(public_path('SandboxCertificate.cer')));
-            $keyData = openssl_pkey_get_details($pub_key);
-            file_put_contents(public_path('key.pub'), $keyData['key']);
-            return true;
-        } else {
-            $pub_key = openssl_pkey_get_public(file_get_contents(public_path('ProductionCertificate.cer')));
-            $keyData = openssl_pkey_get_details($pub_key);
-            file_put_contents(public_path('prod.pub'), $keyData['prod']);
-            return true;
-        }
-    }
-
-    public function generate_security_credential($pass)
+    public function generate_security_credential()
     {
         if (env('MPESA_ENVIRONMENT') == 'sandbox') {
-            $path = public_path('key.pub');
-            $isExists = file_exists($path);
-            if ($isExists != 1) {
-                $this->generate_public_key();
-            }
-            $pk = openssl_pkey_get_public($this->getPublicKey());
-            openssl_public_encrypt($pass, $encrypted, $pk, OPENSSL_PKCS1_PADDING);
-            return base64_encode($encrypted);
+            $pubkey = File::get(public_path('SandboxCertificate.cer'));
         } else {
-            $path = public_path('prod.pub');
-            $isExists = file_exists($path);
-            if ($isExists != 1) {
-                $this->generate_public_key();
-            }
-            $pk = openssl_pkey_get_public($this->getPublicKey());
-            openssl_public_encrypt($pass, $encrypted, $pk, OPENSSL_PKCS1_PADDING);
-            return base64_encode($encrypted);
+            $pubkey = File::get(public_path('ProductionCertificate.cer'));
         }
-    }
-
-    public function getPublicKey()
-    {
-        if (env('MPESA_ENVIRONMENT') == 'sandbox') {
-            $key = file_get_contents(public_path('key.pub'));
-            return $key;
-        } else {
-            $key = file_get_contents(public_path('prod.pub'));
-            return $key;
-        }
+        openssl_public_encrypt(env('MPESA_INITIATOR_PASSWORD'), $output, $pubkey, OPENSSL_PKCS1_PADDING);
+        return base64_encode($output);
     }
 
     public function validationResponse($result_code, $result_description)
