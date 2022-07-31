@@ -9,12 +9,13 @@ class BraintreeController extends Controller
 {
     public static function Gateway()
     {
-        $gateway = new Gateway([
-            'environment' => env('BT_ENVIRONMENT'),
-            'merchantId' => env('BT_MERCHANT_ID'),
-            'publicKey' => env('BT_PUBLIC_KEY'),
-            'privateKey' => env('BT_PRIVATE_KEY')
-        ]);
+        $configs = [
+            'environment' => config('services.braintree.environment'),
+            'merchantId' => config('services.braintree.merchantId'),
+            'publicKey' => config('services.braintree.publicKey'),
+            'privateKey' => config('services.braintree.privateKey')
+        ];
+        $gateway = new Gateway($configs);
         return $gateway;
     }
 
