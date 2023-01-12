@@ -3,30 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\MpesaC2B;
-use App\Traits\Mpesa;
+use Iankumu\Mpesa\Facades\Mpesa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 
 class MPESAC2BController extends Controller
 {
-    use Mpesa;
 
     public function registerURLS(Request $request)
     {
         $shortcode = $request->input('shortcode');
-        $body = [
-            "ShortCode" => (int)$shortcode,
-            "ResponseType" => "Completed",
-            "ConfirmationURL" => route('c2b.confirm'), //url should be https and should not contain keywords such as mpesa,safaricom etc
-            "ValidationURL" => route('c2b.validate'), //url should be https and should not contain keywords such as mpesa,safaricom etc
-        ];
-        $url = env('MPESA_ENVIRONMENT') == 'sandbox'
-            ? 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl'
-            : 'https://api.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+        $response = Mpesa::c2bregisterURLS($shortcode);
+        $result = json_decode((string)$response);
 
-        $response = $this->MpesaRequest($url, $body);
-        return $response;
+        return $result;
     }
 
     public function simulate(Request $request)
@@ -35,21 +26,17 @@ class MPESAC2BController extends Controller
         $amount = $request->input('amount');
         $account = $request->input('account');
         $shortcode = $request->input('shortcode');
+        $command = $request->input('command');
 
-        $data = [
-            'Msisdn' => $this->phoneValidator($phonenumber),
-            'Amount' => (int) $amount,
-            'BillRefNumber' => $account, //Account number for a paybill
-            'CommandID' => 'CustomerPayBillOnline', //Can also be CustomerBuyGoodsOnline for a till number
-            'ShortCode' => $shortcode // Paybill or Till Number
-        ];
-        // dd($data);
-        $url = env('MPESA_ENVIRONMENT') == 'sandbox'
-            ? 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/simulate'
-            : 'https://api.safaricom.co.ke/mpesa/c2b/v1/simulate';
+        if ($command == "CustomerPayBillOnline") {
 
-        $response = $this->MpesaRequest($url, $data);
-        return $response;
+            $response = Mpesa::c2bsimulate($phonenumber, $amount, $shortcode, $command, $account);
+        } else {
+            $response = Mpesa::c2bsimulate($phonenumber, $amount, $shortcode, $command);
+        }
+
+        $result = json_decode((string)$response);
+        return $result;
     }
 
     public function validation()
@@ -57,7 +44,7 @@ class MPESAC2BController extends Controller
         Log::info('Validation endpoint has been hit');
         $result_code = "0";
         $result_description = "Accepted validation request";
-        return $this->validationResponse($result_code, $result_description);
+        return Mpesa::validationResponse($result_code, $result_description);
     }
     public function confirmation(Request $request)
     {
