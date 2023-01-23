@@ -32,6 +32,7 @@ jobs:
             php artisan clear-compiled
             php artisan optimize
             php artisan migrate --force
+            npm install
             npm run build
             php artisan up
             sudo service php8.2-fpm reload
