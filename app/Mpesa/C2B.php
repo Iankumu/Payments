@@ -13,8 +13,6 @@ class C2B
         Log::info('Confirmation endpoint has been hit');
         $payload = $request->all();
 
-        $invoice_id = (int) filter_var($payload['BillRefNumber'], FILTER_SANITIZE_NUMBER_INT);
-
         $c2b = new MpesaC2B();
         $c2b->Transaction_type = $payload['TransactionType'];
         $c2b->mpesa_receipt_number = $payload['TransID'];
@@ -27,7 +25,6 @@ class C2B
         $c2b->ThirdParty_Transaction_ID = $payload['ThirdPartyTransID'];
         $c2b->phonenumber = $payload['MSISDN'];
         $c2b->FirstName = $payload['FirstName'];
-        $c2b->order_id = $invoice_id;
         $c2b->save();
     }
 }
