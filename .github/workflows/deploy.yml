@@ -35,4 +35,4 @@ jobs:
             npm install
             npm run build
             php artisan up
-            sudo service php8.2-fpm reload
+            sudo service php8.1-fpm reload

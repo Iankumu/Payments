@@ -65,13 +65,12 @@ const amount = ref("");
 const shimmer = ref(false);
 
 loadScript({
-    "client-id": import.meta.<wbr>env.VITE_PAYPAL_CLIENT_ID, //load env in production
-    // "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID, //load env in development
+    "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID,
 }).then((paypal) => {
     paypal
         .Buttons({
-            env: import.meta.<wbr>env.VITE_PAYPAL_ENVIRONMENT /* sandbox | production */, //load env in production
-            // env: import.meta.env.VITE_PAYPAL_ENVIRONMENT /* sandbox | production */, //load env in development
+            env: import.meta.env
+                .VITE_PAYPAL_ENVIRONMENT /* sandbox | production */,
             style: {
                 layout: "horizontal", // horizontal | vertical
                 size: "responsive" /* medium | large | responsive*/,
@@ -101,14 +100,10 @@ loadScript({
             onApprove: function (data, actions) {
                 /* Set up a url on your server to execute the payment */
 
-                // var EXECUTE_URL =
-                //     import.meta.env.VITE_APP_URL +
-                //     "api/paypal/transaction/?token=" +
-                //     data.orderID;// load env in development
-                    var EXECUTE_URL =
-                    import.meta.<wbr>env.VITE_APP_URL +
+                var EXECUTE_URL =
+                    import.meta.env.VITE_APP_URL +
                     "api/paypal/transaction/?token=" +
-                    data.orderID;// load env in production
+                    data.orderID;
 
                 Inertia.post(EXECUTE_URL);
 
