@@ -6,7 +6,7 @@ use App\Models\MpesaC2B;
 use Iankumu\Mpesa\Facades\Mpesa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-
+use Inertia\Inertia;
 
 class MPESAC2BController extends Controller
 {
@@ -15,9 +15,11 @@ class MPESAC2BController extends Controller
     {
         $shortcode = $request->input('shortcode');
         $response = Mpesa::c2bregisterURLS($shortcode);
-        $result = json_decode((string)$response);
+        $result = json_decode((string)$response, true);
 
-        return $result;
+        return Inertia::render('Payments/Partials/C2B', [
+            'response' => $result,
+        ]);
     }
 
     public function simulate(Request $request)
@@ -35,8 +37,10 @@ class MPESAC2BController extends Controller
             $response = Mpesa::c2bsimulate($phonenumber, $amount, $shortcode, $command);
         }
 
-        $result = json_decode((string)$response);
-        return $result;
+        $result = json_decode((string)$response, true);
+        return Inertia::render('Payments/Partials/C2B', [
+            'response' => $result,
+        ]);
     }
 
     public function validation()

@@ -7,7 +7,7 @@ use App\Models\MpesaSTK;
 use Iankumu\Mpesa\Facades\Mpesa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-
+use Inertia\Inertia;
 
 class MpesaSTKPUSHController extends Controller
 {
@@ -21,6 +21,9 @@ class MpesaSTKPUSHController extends Controller
         $amount = $request->input('amount');
         $phoneno = $request->input('phonenumber');
         $account_number = $request->input('account_number');
+        // $callback = $request->input('callback');
+
+
 
         $response = Mpesa::stkpush($phoneno, $amount, $account_number);
         $result = json_decode((string)$response, true);
@@ -30,8 +33,10 @@ class MpesaSTKPUSHController extends Controller
             'checkout_request_id' =>  $result['CheckoutRequestID']
         ]);
 
-        // return $phoneno;
-        return $response;
+
+        return Inertia::render('Payments/Partials/Stkpush', [
+            'response' => $result,
+        ]);
     }
 
     // This function is used to review the response from Safaricom once a transaction is complete

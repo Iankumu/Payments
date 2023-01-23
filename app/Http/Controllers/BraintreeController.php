@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Braintree\Gateway;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class BraintreeController extends Controller
 {
@@ -73,6 +74,7 @@ class BraintreeController extends Controller
 
     public function Frontend()
     {
-        return view('welcome', ['token' => $this->generateToken()]);
+        return Inertia::render('Payments/Braintree',['token' => $this->generateToken()]);
+
     }
 }

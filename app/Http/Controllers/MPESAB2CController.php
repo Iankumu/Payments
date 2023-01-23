@@ -7,6 +7,7 @@ use Iankumu\Mpesa\Facades\Mpesa;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class MPESAB2CController extends Controller
 {
@@ -23,7 +24,9 @@ class MPESAB2CController extends Controller
 
         $result = json_decode((string)$response);
 
-        return $result;
+        return Inertia::render('Payments/Partials/B2C', [
+            'response' => $result,
+        ]);
     }
 
     public function result(Request $request)

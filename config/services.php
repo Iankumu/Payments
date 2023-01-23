@@ -34,5 +34,10 @@ return [
         'merchantId' => env('BT_MERCHANT_ID'),
         'publicKey' => env('BT_PUBLIC_KEY'),
         'privateKey' => env('BT_PRIVATE_KEY')
+    ],
+    'paypal'=>[
+        'environment' => env('PAYPAL_ENVIRONMENT','sandbox'),
+        'clientID'=>env('PAYPAL_CLIENT_ID'),
+        'clientSecret'=>env('PAYPAL_CLIENT_SECRET'),
     ]
 ];
