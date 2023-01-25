@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MpesaC2B;
+use App\Mpesa\C2B;
 use Iankumu\Mpesa\Facades\Mpesa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -52,23 +53,7 @@ class MPESAC2BController extends Controller
     }
     public function confirmation(Request $request)
     {
-        Log::info('Confirmation endpoint has been hit');
-        $payload = $request->all();
 
-        $c2b = new MpesaC2B();
-        $c2b->Transaction_type = $payload['TransactionType'];
-        $c2b->Transaction_ID = $payload['TransID'];
-        $c2b->Transaction_Time = $payload['TransTime'];
-        $c2b->Amount = $payload['TransAmount'];
-        $c2b->Business_Shortcode = $payload['BusinessShortCode'];
-        $c2b->Account_Number = $payload['BillRefNumber'];
-        $c2b->Invoice_no = $payload['InvoiceNumber'];
-        $c2b->Organization_Account_Balance = $payload['OrgAccountBalance'];
-        $c2b->ThirdParty_Transaction_ID = $payload['ThirdPartyTransID'];
-        $c2b->Phonenumber = $payload['MSISDN'];
-        $c2b->FirstName = $payload['FirstName'];
-        $c2b->save();
-
-        return response($payload);
+        return (new C2B())->confirm($request);
     }
 }

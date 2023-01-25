@@ -6,7 +6,6 @@ use App\Mpesa\STKPush;
 use App\Models\MpesaSTK;
 use Iankumu\Mpesa\Facades\Mpesa;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 
 class MpesaSTKPUSHController extends Controller

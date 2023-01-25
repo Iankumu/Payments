@@ -26,5 +26,7 @@ class C2B
         $c2b->phonenumber = $payload['MSISDN'];
         $c2b->FirstName = $payload['FirstName'];
         $c2b->save();
+
+        return $payload;
     }
 }
