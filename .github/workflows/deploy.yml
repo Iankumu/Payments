@@ -1,43 +1,3 @@
-# name: Deploy
-
-# # Trigger the workflow on push and
-# # pull request events on the production branch
-# on:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     branches:
-#       - main
-
-# # Authenticate to the the server via ssh
-# # and run our deployment script
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-#       - name: Deploy to server
-#         uses: appleboy/ssh-action@master
-#         with:
-#           host: ${{ secrets.HOST }}
-#           username: ${{ secrets.USERNAME }}
-#           port: ${{ secrets.PORT }}
-#           key: ${{ secrets.SSHKEY }}
-#           script: |
-#             cd /var/www/payments
-#             (php artisan down) || true
-#             git pull origin main
-#             composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-#             php artisan clear-compiled
-#             php artisan optimize
-#             php artisan migrate --force
-#             npm install
-#             npm run build
-#             php artisan up
-#             sudo service php8.1-fpm reload
-#             git stash -u
-
 name: Deploy
 
 on:
@@ -84,7 +44,7 @@ jobs:
           echo "$JSON" >> "${GITHUB_OUTPUT}"
           echo "${delimiter}" >> "${GITHUB_OUTPUT}"
   prepare-release-on-servers:
-    name: "Prepare release"
+    name: Prepare release
     runs-on: ubuntu-latest
     needs: create-deployment-artifacts
     strategy:
@@ -124,7 +84,7 @@ jobs:
             mkdir -p ${{matrix.server.path}}/storage/framework/cache/data
             sudo chmod -R 0777 ${{ matrix.server.path }}/storage
   run-before-hooks:
-    name: "Before hook"
+    name: Before hook
     runs-on: ubuntu-latest
     needs: [create-deployment-artifacts, prepare-release-on-servers]
     strategy:
@@ -148,7 +108,7 @@ jobs:
           script: |
             ${{ matrix.server.beforeHooks }}
   activate-release:
-    name: "Activate release"
+    name: Activate release
     runs-on: ubuntu-latest
     needs:
       [
@@ -183,7 +143,7 @@ jobs:
             sudo ln -s -n -f $RELEASE_PATH $ACTIVE_RELEASE_PATH
             sudo service php8.1-fpm reload
   run-after-hooks:
-    name: "After hook"
+    name: After hook
     runs-on: ubuntu-latest
     needs:
       [
@@ -213,7 +173,7 @@ jobs:
           script: |
             ${{ matrix.server.afterHooks }}
   clean-up:
-    name: "Clean up"
+    name: Clean up
     runs-on: ubuntu-latest
     needs:
       [
