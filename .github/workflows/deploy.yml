@@ -36,3 +36,4 @@ jobs:
             npm run build
             php artisan up
             sudo service php8.1-fpm reload
+            git stash -u
