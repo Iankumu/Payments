@@ -1,39 +1,243 @@
+# name: Deploy
+
+# # Trigger the workflow on push and
+# # pull request events on the production branch
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
+
+# # Authenticate to the the server via ssh
+# # and run our deployment script
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - name: Deploy to server
+#         uses: appleboy/ssh-action@master
+#         with:
+#           host: ${{ secrets.HOST }}
+#           username: ${{ secrets.USERNAME }}
+#           port: ${{ secrets.PORT }}
+#           key: ${{ secrets.SSHKEY }}
+#           script: |
+#             cd /var/www/payments
+#             (php artisan down) || true
+#             git pull origin main
+#             composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+#             php artisan clear-compiled
+#             php artisan optimize
+#             php artisan migrate --force
+#             npm install
+#             npm run build
+#             php artisan up
+#             sudo service php8.1-fpm reload
+#             git stash -u
+
 name: Deploy
 
-# Trigger the workflow on push and
-# pull request events on the production branch
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
-# Authenticate to the the server via ssh
-# and run our deployment script
+  workflow_dispatch:
+
 jobs:
-  deploy:
+  create-deployment-artifacts:
+    name: Create Deployment Artifacts
     runs-on: ubuntu-latest
+    outputs:
+      DEPLOYMENT_MATRIX: ${{steps.export-deployment-matrix.outputs.DEPLOYMENT_MATRIX }}
     steps:
       - uses: actions/checkout@v3
-      - name: Deploy to server
-        uses: appleboy/ssh-action@master
+
+      - name: Configure PHP 8.1
+        uses: shivammathur/setup-php@master
+        with:
+          php-version: 8.1
+          extensions: mbstring, ctype, fileinfo, openssl, PDO, bcmath, json, tokenizer, xml
+
+      - name: Composer Install
+        run: |
+          composer install --no-dev --no-interaction --prefer-dist
+      - name: Create Deployment Artifacts
+        run: tar -czf ${{github.sha}}.tar.gz --exclude=*.git --exclude=node_modules *
+
+      - name: Store Distribution Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-build
+          path: ${{github.sha}}.tar.gz
+          retention-days: 1
+
+      - name: Export Deployment Matrix
+        id: export-deployment-matrix
+        run: |
+          delimiter="$(openssl rand -hex 8)"
+          JSON="$(cat ./deployment.json)"
+          echo "DEPLOYMENT_MATRIX<<${delimiter}" >> "${GITHUB_OUTPUT}"
+          echo "$JSON" >> "${GITHUB_OUTPUT}"
+          echo "${delimiter}" >> "${GITHUB_OUTPUT}"
+  prepare-release-on-servers:
+    name: "Prepare release"
+    runs-on: ubuntu-latest
+    needs: create-deployment-artifacts
+    strategy:
+      matrix:
+        server: ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX ) }}
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: app-build
+      - name: Upload
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT }}
           key: ${{ secrets.SSHKEY }}
+          port: ${{ secrets.PORT }}
+          source: ${{ github.sha }}.tar.gz
+          target: ${{ matrix.server.path }}/artifacts
+      - name: Extract Archives and create directories
+        uses: appleboy/ssh-action@master
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        with:
+          host:  ${{ secrets.HOST }}
+          username:  ${{ secrets.USERNAME }}
+          key: ${{  secrets.SSHKEY }}
+          port:  ${{ secrets.PORT }}
+          envs: GITHUB_SHA
           script: |
-            cd /var/www/payments
-            (php artisan down) || true
-            git pull origin main
-            composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-            php artisan clear-compiled
-            php artisan optimize
-            php artisan migrate --force
-            npm install
-            npm run build
-            php artisan up
+            mkdir -p "${{ matrix.server.path }}/releases/${GITHUB_SHA}"
+            tar xzf ${{ matrix.server.path }}/artifacts/${GITHUB_SHA}.tar.gz -C "${{ matrix.server.path }}/releases/${GITHUB_SHA}"
+            sudo mv ${{matrix.server.path}}/releases/${GITHUB_SHA}/storage/ProductionCertificate.cer  ${{matrix.server.path}}/releases/${GITHUB_SHA}
+            sudo mv ${{matrix.server.path}}/releases/${GITHUB_SHA}/storage/SandboxCertificate.cer  ${{matrix.server.path}}/releases/${GITHUB_SHA}
+            rm -rf ${{matrix.server.path}}/releases/${GITHUB_SHA}/storage
+            mkdir -p ${{matrix.server.path}}/storage/{app,public,framework,logs}
+            mkdir -p ${{matrix.server.path}}/storage/framework/{cache,sessions,testing,views}
+            mkdir -p ${{matrix.server.path}}/storage/framework/cache/data
+            sudo chmod -R 0777 ${{ matrix.server.path }}/storage
+  run-before-hooks:
+    name: "Before hook"
+    runs-on: ubuntu-latest
+    needs: [create-deployment-artifacts, prepare-release-on-servers]
+    strategy:
+      matrix:
+        server: ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX ) }}
+    steps:
+      - name: Run before hooks
+        uses: appleboy/ssh-action@master
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          RELEASE_PATH: ${{ matrix.server.path }}/releases/${{ github.sha }}
+          ACTIVE_RELEASE_PATH: ${{ matrix.server.path }}/current
+          STORAGE_PATH: ${{ matrix.server.path }}/storage
+          BASE_PATH: ${{ matrix.server.path }}
+        with:
+          host:  ${{ secrets.HOST }}
+          username:  ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          port:  ${{ secrets.PORT }}
+          envs: GITHUB_SHA,RELEASE_PATH,ACTIVE_RELEASE_PATH,STORAGE_PATH,BASE_PATH
+          script: |
+            ${{ matrix.server.beforeHooks }}
+  activate-release:
+    name: "Activate release"
+    runs-on: ubuntu-latest
+    needs:
+      [
+        create-deployment-artifacts,
+        prepare-release-on-servers,
+        run-before-hooks,
+      ]
+    strategy:
+      matrix:
+        server: ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX  ) }}
+    steps:
+      - name: Activate release
+        uses: appleboy/ssh-action@master
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          RELEASE_PATH: ${{ matrix.server.path }}/releases/${{ github.sha }}
+          ACTIVE_RELEASE_PATH: ${{ matrix.server.path }}/current
+          STORAGE_PATH: ${{ matrix.server.path }}/storage
+          BASE_PATH: ${{ matrix.server.path }}
+          LARAVEL_ENV: ${{ secrets.LARAVEL_ENV }}
+        with:
+          host:  ${{ secrets.HOST }}
+          username:  ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          port:  ${{ secrets.PORT }}
+          envs: GITHUB_SHA,RELEASE_PATH,ACTIVE_RELEASE_PATH,STORAGE_PATH,BASE_PATH,ENV_PATH,LARAVEL_ENV
+          script: |
+            rm -rf ${BASE_PATH}/.env
+            printf "%s" "$LARAVEL_ENV" > "${BASE_PATH}/.env"
+            sudo ln -s -f ${BASE_PATH}/.env $RELEASE_PATH
+            sudo ln -s -f $STORAGE_PATH $RELEASE_PATH
+            sudo ln -s -n -f $RELEASE_PATH $ACTIVE_RELEASE_PATH
             sudo service php8.1-fpm reload
-            git stash -u
+  run-after-hooks:
+    name: "After hook"
+    runs-on: ubuntu-latest
+    needs:
+      [
+        create-deployment-artifacts,
+        prepare-release-on-servers,
+        run-before-hooks,
+        activate-release,
+      ]
+    strategy:
+      matrix:
+        server: ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX ) }}
+    steps:
+      - name: Run after hooks
+        uses: appleboy/ssh-action@master
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          RELEASE_PATH: ${{ matrix.server.path }}/releases/${{ github.sha }}
+          ACTIVE_RELEASE_PATH: ${{ matrix.server.path }}/current
+          STORAGE_PATH: ${{ matrix.server.path }}/storage
+          BASE_PATH: ${{ matrix.server.path }}
+        with:
+          host:  ${{ secrets.HOST }}
+          username:  ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          port:  ${{ secrets.PORT }}
+          envs: GITHUB_SHA,RELEASE_PATH,ACTIVE_RELEASE_PATH,STORAGE_PATH,BASE_PATH
+          script: |
+            ${{ matrix.server.afterHooks }}
+  clean-up:
+    name: "Clean up"
+    runs-on: ubuntu-latest
+    needs:
+      [
+        create-deployment-artifacts,
+        prepare-release-on-servers,
+        run-before-hooks,
+        activate-release,
+        run-after-hooks,
+      ]
+    strategy:
+      matrix:
+        server: ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX ) }}
+    steps:
+      - name: Clean Up
+        uses: appleboy/ssh-action@master
+        env:
+          RELEASES_PATH: ${{ matrix.server.path }}/releases
+          ARTIFACTS_PATH: ${{ matrix.server.path }}/artifacts
+        with:
+          host:  ${{ secrets.HOST }}
+          username:  ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          port:  ${{ secrets.PORT }}
+          envs: RELEASES_PATH,ARTIFACTS_PATH
+          script: |
+            cd $RELEASES_PATH && sudo ls -t -1 | tail -n +2 | xargs rm -rf
+            cd $ARTIFACTS_PATH && sudo ls -t -1 | tail -n +2 | xargs rm -rf
