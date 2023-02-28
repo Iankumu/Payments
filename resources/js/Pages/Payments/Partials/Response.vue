@@ -9,7 +9,7 @@
             class="mb-3 font-normal text-gray-500 dark:text-gray-400"
         >
 
-            {{ text }}
+            {{ JSON.stringify(text) }}
 
         </pre>
 
@@ -27,3 +27,11 @@ defineProps({
     },
 });
 </script>
+
+<style scoped>
+
+pre{
+    white-space: pre-wrap;
+}
+
+</style>

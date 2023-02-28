@@ -5,9 +5,6 @@
         "build": "vite build"
     },
     "devDependencies": {
-        "@inertiajs/inertia": "^0.11.0",
-        "@inertiajs/inertia-vue3": "^0.6.0",
-        "@inertiajs/progress": "^0.2.7",
         "@tailwindcss/forms": "^0.5.3",
         "@types/braintree-web": "^3.75.22",
         "@vitejs/plugin-vue": "^4.0.0",
@@ -23,7 +20,7 @@
         "vue": "^3.2.41"
     },
     "dependencies": {
-        "@paypal/paypal-js": "^5.1.4",
-        "braintree-web": "^3.88.6"
+        "@inertiajs/vue3": "^1.0.2",
+        "@paypal/paypal-js": "^5.1.4"
     }
 }

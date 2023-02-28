@@ -1,12 +1,7 @@
 <script setup>
 import SideBar from "../Components/SideBar.vue";
-import { Head } from "@inertiajs/inertia-vue3";
+import { Head } from "@inertiajs/vue3";
 
-import { Inertia } from "@inertiajs/inertia";
-
-function mpesa() {
-    // Inertia.p;
-}
 </script>
 
 <template>

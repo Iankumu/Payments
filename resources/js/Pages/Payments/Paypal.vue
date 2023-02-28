@@ -52,9 +52,10 @@ import { loadScript } from "@paypal/paypal-js";
 import Shimmer from "../../Components/Shimmer.vue";
 import Response from "./Partials/Response.vue";
 import { ref } from "vue";
-import { Inertia } from "@inertiajs/inertia";
+import { router } from "@inertiajs/vue3";
 
-defineProps({
+
+const props = defineProps({
     response: {
         Type: String,
         default: null,
@@ -102,12 +103,10 @@ loadScript({
 
                 var EXECUTE_URL =
                     import.meta.env.VITE_APP_URL +
-                    "api/paypal/transaction/?token=" +
-                    data.orderID;
+                    "api/paypal/transaction";
 
-                Inertia.post(EXECUTE_URL);
-
-                Inertia.on("success", () => {
+                router.post(EXECUTE_URL,{token : data.orderID});
+                router.on("success", () => {
                     shimmer.value = false;
                 });
             },

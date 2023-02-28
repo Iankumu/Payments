@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Paypal;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 
@@ -20,7 +19,6 @@ class PaypalController extends Controller
             : "https://api-m.paypal.com";
     }
 
-    // Used for testing
     public function view()
     {
         return Inertia::render('Payments/Paypal');
@@ -47,10 +45,9 @@ class PaypalController extends Controller
     // Create a Transaction
     public function PayPal(Request $request)
     {
-        // return $this->initialize();
         $amount = $request->input('amount');
         $url = $this->base_url . '/v2/checkout/orders';
-        $curl = curl_init();
+
 
         $data = [
             "intent" => "CAPTURE",
@@ -69,64 +66,24 @@ class PaypalController extends Controller
             ]
         ];
 
-        $response = Http::withToken($this->initialize())->asJson()->post($url, $data);
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => json_encode($data),
-            CURLOPT_HTTPHEADER => array(
-                'accept: application/json',
-                'accept-language: en_US',
-                'authorization: Bearer ' . $this->initialize(),
-                'content-type: application/json'
-            ),
-        ));
-
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-
-        curl_close($curl);
-
+        $response = Http::withToken($this->initialize())->asJson()->acceptJson()->post($url, $data);
 
         $result = json_decode($response);
 
         return $result;
-
     }
+
     // Process the transaction
     public function Transaction(Request $request)
     {
-
-        $token  = $request->query('token');
-
+        $token  = $request->input('token');
 
         $url = $this->base_url . "/v2/checkout/orders/" . $token . "/capture";
 
-
-        $curl = curl_init();
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_HTTPHEADER => array(
-                'authorization: Bearer ' . $this->initialize(),
-                'content-type: application/json'
-            ),
-        ));
-
-        $response = curl_exec($curl);
-
-
-        curl_close($curl);
+        $response = Http::withToken($this->initialize())
+            ->asJson()
+            ->acceptJson()
+            ->post($url, null);
 
 
         $result = json_decode($response, true);
@@ -154,8 +111,8 @@ class PaypalController extends Controller
         // Add the paypal transaction details to the Database
         Paypal::create($paypal_transaction);
 
-        return Inertia::render('Payments/Paypal', [
-            'response' => $result
+        return Inertia::render("Payments/Paypal", [
+            "response" => $result
         ]);
     }
 }

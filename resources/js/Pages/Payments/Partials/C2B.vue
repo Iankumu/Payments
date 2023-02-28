@@ -152,7 +152,7 @@ import Mpesa from "../Mpesa.vue";
 import Response from "./Response.vue";
 import Shimmer from "../../../Components/Shimmer.vue";
 import { ref, reactive } from "vue";
-import { Inertia } from "@inertiajs/inertia";
+import { router } from "@inertiajs/vue3";
 
 const shimmer = ref(false);
 
@@ -183,16 +183,16 @@ const options = [
 
 function submiturls() {
     shimmer.value = true;
-    Inertia.post("/register-urls", urlform);
-    Inertia.on("success", () => {
+    router.post("/register-urls", urlform);
+    router.on("success", () => {
         shimmer.value = false;
     });
 }
 
 function submit() {
     shimmer.value = true;
-    Inertia.post("/c2b/simulate", form);
-    Inertia.on("success", () => {
+    router.post("/c2b/simulate", form);
+    router.on("success", () => {
         shimmer.value = false;
     });
 }

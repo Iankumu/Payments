@@ -92,7 +92,7 @@ import Mpesa from "../Mpesa.vue";
 import Response from "./Response.vue";
 import Shimmer from "../../../Components/Shimmer.vue";
 import { ref, reactive } from "vue";
-import { Inertia } from "@inertiajs/inertia";
+import { router } from "@inertiajs/vue3";
 
 const shimmer = ref(false);
 
@@ -112,8 +112,8 @@ defineProps({
 
 function submit() {
     shimmer.value = true;
-    Inertia.post("/reversals", form);
-    Inertia.on("success", () => {
+    router.post("/reversals", form);
+    router.on("success", () => {
         shimmer.value = false;
     });
 }
