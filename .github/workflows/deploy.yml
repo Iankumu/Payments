@@ -44,7 +44,7 @@ jobs:
           echo "$JSON" >> "${GITHUB_OUTPUT}"
           echo "${delimiter}" >> "${GITHUB_OUTPUT}"
   prepare-release-on-servers:
-    name: Prepare release
+    name: "${{ matrix.server.name }}: Prepare release"
     runs-on: ubuntu-latest
     needs: create-deployment-artifacts
     strategy:
@@ -84,7 +84,7 @@ jobs:
             mkdir -p ${{matrix.server.path}}/storage/framework/cache/data
             sudo chmod -R 0777 ${{ matrix.server.path }}/storage
   run-before-hooks:
-    name: Before hook
+    name: "${{ matrix.server.name }}: Before hook"
     runs-on: ubuntu-latest
     needs: [create-deployment-artifacts, prepare-release-on-servers]
     strategy:
@@ -108,7 +108,7 @@ jobs:
           script: |
             ${{ matrix.server.beforeHooks }}
   activate-release:
-    name: Activate release
+    name: "${{ matrix.server.name }}: Activate release"
     runs-on: ubuntu-latest
     needs:
       [
@@ -143,7 +143,7 @@ jobs:
             sudo ln -s -n -f $RELEASE_PATH $ACTIVE_RELEASE_PATH
             sudo service php8.1-fpm reload
   run-after-hooks:
-    name: After hook
+    name: "${{ matrix.server.name }}: After hook"
     runs-on: ubuntu-latest
     needs:
       [
@@ -173,7 +173,7 @@ jobs:
           script: |
             ${{ matrix.server.afterHooks }}
   clean-up:
-    name: Clean up
+    name: "${{ matrix.server.name }}: Clean up"
     runs-on: ubuntu-latest
     needs:
       [

@@ -1,5 +1,6 @@
 [
     {
+        "name":"Production",
         "beforeHooks": "echo $GITHUB_SHA",
         "afterHooks": "cd /var/www/payments/current && php artisan clear-compiled && php artisan optimize && php artisan view:cache && npm install && npm run build",
         "path": "/var/www/payments"
