@@ -20,6 +20,7 @@
     },
     "dependencies": {
         "@inertiajs/vue3": "^1.0.2",
-        "@paypal/paypal-js": "^5.1.4"
+        "@paypal/paypal-js": "^5.1.4",
+        "vue-json-pretty": "^2.2.3"
     }
 }
