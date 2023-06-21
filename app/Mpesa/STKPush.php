@@ -13,17 +13,20 @@ class STKPush
 
     public function confirm(Request $request)
     {
-        $payload = json_decode($request->getContent());
+        $payload = json_decode($request->getContent(), true);
 
-        if (property_exists($payload, 'Body') && $payload->Body->stkCallback->ResultCode == '0') {
-            $merchant_request_id = $payload->Body->stkCallback->MerchantRequestID;
-            $checkout_request_id = $payload->Body->stkCallback->CheckoutRequestID;
-            $result_desc = $payload->Body->stkCallback->ResultDesc;
-            $result_code = $payload->Body->stkCallback->ResultCode;
-            $amount = $payload->Body->stkCallback->CallbackMetadata->Item[0]->Value;
-            $mpesa_receipt_number = $payload->Body->stkCallback->CallbackMetadata->Item[1]->Value;
-            $transaction_date = $payload->Body->stkCallback->CallbackMetadata->Item[3]->Value;
-            $phonenumber = $payload->Body->stkCallback->CallbackMetadata->Item[4]->Value;
+        if (isset($payload['Body']) && $payload['Body']['stkCallback']['ResultCode'] == '0') {
+            $merchant_request_id = $payload['Body']['stkCallback']['MerchantRequestID'];
+            $checkout_request_id = $payload['Body']['stkCallback']['CheckoutRequestID'];
+            $result_desc = $payload['Body']['stkCallback']['ResultDesc'];
+            $result_code = $payload['Body']['stkCallback']['ResultCode'];
+
+            $items = collect($payload['Body']['stkCallback']['CallbackMetadata']['Item']);
+
+            $amount = $items->firstWhere('Name', 'Amount')['Value'];
+            $mpesa_receipt_number = $items->firstWhere('Name', 'MpesaReceiptNumber')['Value'];
+            $transaction_date = $items->firstWhere('Name', 'TransactionDate')['Value'];
+            $phonenumber = $items->firstWhere('Name', 'PhoneNumber')['Value'];
 
             $stkPush = MpesaSTK::where('merchant_request_id', $merchant_request_id)
                 ->where('checkout_request_id', $checkout_request_id)->first();
