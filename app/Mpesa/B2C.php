@@ -34,9 +34,6 @@ class B2C
                 'B2CWorkingAccountAvailableFunds' => $payload->Result->ResultParameters->ResultParameter[7]->Value, //Working Account Balance
             ];
 
-            $withdrawal = MpesaB2C::where('ConversationID', $payload->Result->ConversationID)
-                ->where('OriginatorConversationID', $payload->Result->OriginatorConversationID)->first();
-
             if ($withdrawal) {
                 $withdrawal->fill($b2cDetails)->save();
 
