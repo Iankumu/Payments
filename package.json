@@ -9,7 +9,7 @@
         "@types/braintree-web": "^3.75.22",
         "@vitejs/plugin-vue": "^4.0.0",
         "autoprefixer": "^10.4.12",
-        "axios": "^0.21",
+        "axios": "^1.6",
         "cross-env": "^7.0",
         "laravel-vite-plugin": "^0.7.3",
         "postcss": "^8.4.18",
