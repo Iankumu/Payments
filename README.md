@@ -7,7 +7,7 @@ This is an implementation of the various Payment Gateways in Laravel including `
 To run this project locally clone the repository and in the project directory,run the following commands:
 
 ```
-$ cp.env.example .env
+$ cp .env.example .env
 $ composer install
 $ php artisan key:generate
 $ php artisan migrate
