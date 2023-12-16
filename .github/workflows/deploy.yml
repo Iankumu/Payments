@@ -16,10 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Configure PHP 8.1
+      - name: Configure PHP 8.2
         uses: shivammathur/setup-php@master
         with:
-          php-version: 8.1
+          php-version: 8.2
           extensions: mbstring, ctype, fileinfo, openssl, PDO, bcmath, json, tokenizer, xml
 
       - name: Composer Install
@@ -68,10 +68,10 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.sha }}
         with:
-          host:  ${{ secrets.HOST }}
-          username:  ${{ secrets.USERNAME }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
           key: ${{  secrets.SSHKEY }}
-          port:  ${{ secrets.PORT }}
+          port: ${{ secrets.PORT }}
           envs: GITHUB_SHA
           script: |
             mkdir -p "${{ matrix.server.path }}/releases/${GITHUB_SHA}"
@@ -100,10 +100,10 @@ jobs:
           STORAGE_PATH: ${{ matrix.server.path }}/storage
           BASE_PATH: ${{ matrix.server.path }}
         with:
-          host:  ${{ secrets.HOST }}
-          username:  ${{ secrets.USERNAME }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
-          port:  ${{ secrets.PORT }}
+          port: ${{ secrets.PORT }}
           envs: GITHUB_SHA,RELEASE_PATH,ACTIVE_RELEASE_PATH,STORAGE_PATH,BASE_PATH
           script: |
             ${{ matrix.server.beforeHooks }}
@@ -130,10 +130,10 @@ jobs:
           BASE_PATH: ${{ matrix.server.path }}
           LARAVEL_ENV: ${{ secrets.LARAVEL_ENV }}
         with:
-          host:  ${{ secrets.HOST }}
-          username:  ${{ secrets.USERNAME }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
-          port:  ${{ secrets.PORT }}
+          port: ${{ secrets.PORT }}
           envs: GITHUB_SHA,RELEASE_PATH,ACTIVE_RELEASE_PATH,STORAGE_PATH,BASE_PATH,ENV_PATH,LARAVEL_ENV
           script: |
             rm -rf ${BASE_PATH}/.env
@@ -141,7 +141,7 @@ jobs:
             sudo ln -s -f ${BASE_PATH}/.env $RELEASE_PATH
             sudo ln -s -f $STORAGE_PATH $RELEASE_PATH
             sudo ln -s -n -f $RELEASE_PATH $ACTIVE_RELEASE_PATH
-            sudo service php8.1-fpm reload
+            sudo service php8.2-fpm reload
   run-after-hooks:
     name: "${{ matrix.server.name }}: After hook"
     runs-on: ubuntu-latest
@@ -165,10 +165,10 @@ jobs:
           STORAGE_PATH: ${{ matrix.server.path }}/storage
           BASE_PATH: ${{ matrix.server.path }}
         with:
-          host:  ${{ secrets.HOST }}
-          username:  ${{ secrets.USERNAME }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
-          port:  ${{ secrets.PORT }}
+          port: ${{ secrets.PORT }}
           envs: GITHUB_SHA,RELEASE_PATH,ACTIVE_RELEASE_PATH,STORAGE_PATH,BASE_PATH
           script: |
             ${{ matrix.server.afterHooks }}
@@ -193,10 +193,10 @@ jobs:
           RELEASES_PATH: ${{ matrix.server.path }}/releases
           ARTIFACTS_PATH: ${{ matrix.server.path }}/artifacts
         with:
-          host:  ${{ secrets.HOST }}
-          username:  ${{ secrets.USERNAME }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
-          port:  ${{ secrets.PORT }}
+          port: ${{ secrets.PORT }}
           envs: RELEASES_PATH,ARTIFACTS_PATH
           script: |
             cd $RELEASES_PATH && sudo ls -t -1 | tail -n +2 | xargs rm -rf
