@@ -63,6 +63,8 @@ class MpesaSTKPUSHController extends Controller
         $response = Mpesa::stkquery($checkoutRequestId);
         $result = json_decode((string)$response);
 
-        return $result;
+        return Inertia::render('Payments/Partials/Stkpush', [
+            'response' => $result,
+        ]);
     }
 }
