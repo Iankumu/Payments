@@ -27,10 +27,12 @@ class MpesaSTKPUSHController extends Controller
         $response = Mpesa::stkpush($phoneno, $amount, $account_number);
         $result = json_decode((string)$response, true);
 
-        MpesaSTK::create([
-            'merchant_request_id' =>  $result['MerchantRequestID'],
-            'checkout_request_id' =>  $result['CheckoutRequestID']
-        ]);
+        if (!is_null($result)) {
+            MpesaSTK::create([
+                'merchant_request_id' =>  $result['MerchantRequestID'],
+                'checkout_request_id' =>  $result['CheckoutRequestID']
+            ]);
+        }
 
 
         return Inertia::render('Payments/Partials/Stkpush', [
@@ -38,7 +40,7 @@ class MpesaSTKPUSHController extends Controller
         ]);
     }
 
-    // This function is used to review the response from Safaricom once a transaction is complete
+    // This function is used to handle the callback response from Safaricom once a transaction is complete
     public function STKConfirm(Request $request)
     {
         $stk_push_confirm = (new STKPush())->confirm($request);

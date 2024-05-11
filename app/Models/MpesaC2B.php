@@ -9,10 +9,13 @@ class MpesaC2B extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'Transaction_type','Transaction_ID','Transaction_Time','Amount','Business_Shortcode',
-        'Account_Number','Invoice_no','Organization_Account_Balance','ThirdParty_Transaction_ID',
-        'Phonenumber','FirstName'
-    ];
+    // protected $fillable = [
+    //     'Transaction_type','Transaction_ID','Transaction_Time','Amount','Business_Shortcode',
+    //     'Account_Number','Invoice_no','Organization_Account_Balance','ThirdParty_Transaction_ID',
+    //     'Phonenumber','FirstName'
+    // ];
+
+    protected $guarded = [];
+
     protected $table = 'mpesa_c2b';
 }

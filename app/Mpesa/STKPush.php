@@ -15,7 +15,7 @@ class STKPush
     {
         $payload = json_decode($request->getContent(), true);
 
-        Log::info('Confirmation Endpoint has been hit');
+        Log::info('STKPush Confirmation Endpoint has been hit');
 
         if (isset($payload['Body']) && $payload['Body']['stkCallback']['ResultCode'] == '0') {
             $merchant_request_id = $payload['Body']['stkCallback']['MerchantRequestID'];
