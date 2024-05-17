@@ -45,12 +45,15 @@ class MpesaController extends Controller
         $shortcode = $request->input('shortcode');
         $identifier = $request->input('identiertype');
         $remarks = $request->input('remarks');
-        $response=Mpesa::accountBalance($shortcode,$identifier,$remarks);
+        $response = Mpesa::accountBalance($shortcode, $identifier, $remarks);
 
-        $result = json_decode((string)$response);
+        // $result = json_decode((string)$response);
 
-        return Inertia::render('Payments/Partials/AccountBalance',[
-            'response'=>$result
+        /** @var \Illuminate\Http\Client\Response $response */
+        $result = $response->json();
+
+        return Inertia::render('Payments/Partials/AccountBalance', [
+            'response' => $result
         ]);
     }
     public function simulate_status(Request $request)
@@ -59,12 +62,15 @@ class MpesaController extends Controller
         $identifier = $request->input('identiertype');
         $transactionid = $request->input('transactionid');
         $remarks = $request->input('remarks');
-        $response=Mpesa::transactionStatus($shortcode,$transactionid,$identifier,$remarks);
+        $response = Mpesa::transactionStatus($shortcode, $transactionid, $identifier, $remarks);
 
-        $result = json_decode((string)$response);
+        // $result = json_decode((string)$response);
 
-        return Inertia::render('Payments/Partials/TransactionStatus',[
-            'response'=>$result
+        /** @var \Illuminate\Http\Client\Response $response */
+        $result = $response->json();
+
+        return Inertia::render('Payments/Partials/TransactionStatus', [
+            'response' => $result
         ]);
     }
     public function simulate_reversals(Request $request)
@@ -73,12 +79,15 @@ class MpesaController extends Controller
         $transactionid = $request->input('transactionid');
         $amount = $request->input('amount');
         $remarks = $request->input('remarks');
-        $response=Mpesa::reversal($shortcode,$transactionid,$amount,$remarks);
+        $response = Mpesa::reversal($shortcode, $transactionid, $amount, $remarks);
 
-        $result = json_decode((string)$response);
+        // $result = json_decode((string)$response);
 
-        return Inertia::render('Payments/Partials/Reversals',[
-            'response'=>$result
+        /** @var \Illuminate\Http\Client\Response $response */
+        $result = $response->json();
+
+        return Inertia::render('Payments/Partials/Reversals', [
+            'response' => $result
         ]);
     }
 

@@ -16,7 +16,10 @@ class MPESAC2BController extends Controller
     {
         $shortcode = $request->input('shortcode');
         $response = Mpesa::c2bregisterURLS($shortcode);
-        $result = json_decode((string)$response, true);
+        // $result = json_decode((string)$response, true);
+
+        /** @var \Illuminate\Http\Client\Response $response */
+        $result = $response->json();
 
         return Inertia::render('Payments/Partials/C2B', [
             'response' => $result,

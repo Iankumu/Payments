@@ -22,7 +22,10 @@ class MPESAB2CController extends Controller
 
         $response = Mpesa::b2c($phoneno, $command, $amount, $remarks);
 
-        $result = json_decode((string)$response);
+        // $result = json_decode((string)$response);
+
+        /** @var \Illuminate\Http\Client\Response $response */
+        $result = $response->json();
 
         return Inertia::render('Payments/Partials/B2C', [
             'response' => $result,

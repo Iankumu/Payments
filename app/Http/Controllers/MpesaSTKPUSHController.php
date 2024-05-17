@@ -25,7 +25,10 @@ class MpesaSTKPUSHController extends Controller
 
 
         $response = Mpesa::stkpush($phoneno, $amount, $account_number);
-        $result = json_decode((string)$response, true);
+        // $result = json_decode((string)$response, true);
+
+        /** @var \Illuminate\Http\Client\Response $response */
+        $result = $response->json();
 
         if (!is_null($result)) {
             MpesaSTK::create([
