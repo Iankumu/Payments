@@ -152,7 +152,7 @@ function onSelectChange(e) {
     var transaction_type = e.target.value;
 
     form.transaction_type = transaction_type;
-    if (transaction_type === "CustomerPayBillOnline") {
+    if (transaction_type === "paybill") {
         type.value = true;
     } else {
         type.value = false;
