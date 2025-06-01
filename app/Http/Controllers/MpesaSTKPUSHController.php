@@ -17,14 +17,22 @@ class MpesaSTKPUSHController extends Controller
     public function STKPush(Request $request)
     {
 
+
         $amount = $request->input('amount');
         $phoneno = $request->input('phonenumber');
         $account_number = $request->input('account_number');
+        $transactionType = $request->transaction_type == 'paybill' ? Mpesa::PAYBILL : Mpesa::TILL;
+
+
         // $callback = $request->input('callback');
 
-
-
-        $response = Mpesa::stkpush($phoneno, $amount, $account_number);
+        $response = Mpesa::stkpush(
+            $phoneno,
+            $amount,
+            $account_number,
+            null,
+            $transactionType
+        );
         // $result = json_decode((string)$response, true);
 
         /** @var \Illuminate\Http\Client\Response $response */

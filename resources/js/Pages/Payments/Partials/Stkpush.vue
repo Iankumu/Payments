@@ -36,6 +36,27 @@
                             >Amount (KES 100)</label
                         >
                     </div>
+                    <div
+                                class="relative z-0 w-full mb-6 group flex flex-col"
+                            >
+                                <label
+                                    for="command"
+                                    class="text-white text-sm my-2"
+                                    >Transaction Type</label
+                                >
+                                <Select @change="onSelectChange($event)">
+                                    <option :value="null" selected>
+                                        Select A Transaction Type
+                                    </option>
+                                    <option
+                                        v-for="option in options"
+                                        :key="option.id"
+                                        :value="option.value"
+                                    >
+                                        {{ option.name }}
+                                    </option>
+                                </Select>
+                            </div>
                     <div class="relative z-0 w-full mb-6 group">
                         <input
                             type="text"
@@ -43,12 +64,14 @@
                             id="floating_accountno"
                             class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             placeholder=" "
+                            :class="type ? 'block' : 'hidden'"
                             v-model="form.account_number"
-                            required
+
                         />
                         <label
                             for="floating_accountno"
                             class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                            :class="type ? 'block' : 'hidden'"
                             >Account Number(For Paybill)</label
                         >
                     </div>
@@ -110,13 +133,33 @@ import Shimmer from "../../../Components/Shimmer.vue";
 import { ref, reactive } from "vue";
 import { router } from "@inertiajs/vue3";
 
+const options = [
+    { value: "till", id: 1, name: "Buy Goods" },
+    { value: "paybill", id: 2, name: "Pay Bill" },
+];
+
 const shimmer = ref(false);
+const type = ref(false);
 
 const form = reactive({
     phonenumber: "",
     amount: "",
     account_number: "",
+    transaction_type: "",
 });
+
+function onSelectChange(e) {
+    var transaction_type = e.target.value;
+
+    form.transaction_type = transaction_type;
+    if (transaction_type === "CustomerPayBillOnline") {
+        type.value = true;
+    } else {
+        type.value = false;
+    }
+
+    // console.log(command);
+}
 
 const queryForm = reactive({
     CheckoutRequestID: "",
