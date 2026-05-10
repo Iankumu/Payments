@@ -14,12 +14,12 @@ jobs:
     outputs:
       DEPLOYMENT_MATRIX: ${{steps.export-deployment-matrix.outputs.DEPLOYMENT_MATRIX }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
-      - name: Configure PHP 8.2
+      - name: Configure PHP 8.4
         uses: shivammathur/setup-php@master
         with:
-          php-version: 8.2
+          php-version: 8.4
           extensions: mbstring, ctype, fileinfo, openssl, PDO, bcmath, json, tokenizer, xml
 
       - name: Composer Install
@@ -29,7 +29,7 @@ jobs:
         run: tar -czf ${{github.sha}}.tar.gz --exclude=*.git --exclude=node_modules *
 
       - name: Store Distribution Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: app-build
           path: ${{github.sha}}.tar.gz
@@ -49,9 +49,11 @@ jobs:
     needs: create-deployment-artifacts
     strategy:
       matrix:
-        server: ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX ) }}
+        server:
+          ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX
+          ) }}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: app-build
       - name: Upload
@@ -89,7 +91,9 @@ jobs:
     needs: [create-deployment-artifacts, prepare-release-on-servers]
     strategy:
       matrix:
-        server: ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX ) }}
+        server:
+          ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX
+          ) }}
     steps:
       - name: Run before hooks
         uses: appleboy/ssh-action@master
@@ -118,7 +122,9 @@ jobs:
       ]
     strategy:
       matrix:
-        server: ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX  ) }}
+        server: ${{
+          fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX  )
+          }}
     steps:
       - name: Activate release
         uses: appleboy/ssh-action@master
@@ -141,7 +147,7 @@ jobs:
             sudo ln -s -f ${BASE_PATH}/.env $RELEASE_PATH
             sudo ln -s -f $STORAGE_PATH $RELEASE_PATH
             sudo ln -s -n -f $RELEASE_PATH $ACTIVE_RELEASE_PATH
-            sudo service php8.2-fpm reload
+            sudo service php8.4-fpm reload
   run-after-hooks:
     name: "${{ matrix.server.name }}: After hook"
     runs-on: ubuntu-latest
@@ -154,7 +160,9 @@ jobs:
       ]
     strategy:
       matrix:
-        server: ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX ) }}
+        server:
+          ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX
+          ) }}
     steps:
       - name: Run after hooks
         uses: appleboy/ssh-action@master
@@ -185,7 +193,9 @@ jobs:
       ]
     strategy:
       matrix:
-        server: ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX ) }}
+        server:
+          ${{ fromJson(needs.create-deployment-artifacts.outputs.DEPLOYMENT_MATRIX
+          ) }}
     steps:
       - name: Clean Up
         uses: appleboy/ssh-action@master
